@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
+    <title>SmartSchool | Messages</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/theme.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --message-primary: #2563eb;
+            --message-bg: #f3f6fb;
+            --message-card: #ffffff;
+            --message-text: #172338;
+            --message-muted: #64748b;
+            --message-line: #e7edf5;
+            --message-nav: #0b1728;
+            --message-soft: #eef5ff;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--message-bg);
+            color: var(--message-text);
+            font-family: Inter, 'Segoe UI', sans-serif;
+        }
+
+        .messages-app { min-height: 100vh; }
+
+        .messages-sidebar {
+            position: fixed;
+            inset: 0 auto 0 0;
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+            width: 216px;
+            padding: 18px 12px 14px;
+            background: var(--message-nav);
+            color: #f8fafc;
+            box-shadow: 8px 0 18px rgba(15, 23, 42, 0.08);
+        }
+
+        .messages-brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 42px;
+            padding: 0 6px 14px;
+            border-bottom: 1px solid rgba(148, 163, 184, .16);
+            color: #fff;
+            font-size: 17px;
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        .messages-brand i {
+            display: grid;
+            width: 32px;
+            height: 32px;
+            place-items: center;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            font-size: 0.8rem;
+        }
+
+        .messages-nav-label {
+            margin: 20px 8px 8px;
+            color: #8ea3c1;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+        }
+
+        .messages-nav { display: grid; gap: 4px; }
+
+        .messages-nav a,
+        .messages-nav button {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            width: 100%;
+            min-height: 40px;
+            padding: 9px 10px;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            background: transparent;
+            color: #d7e1f0;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 1.2;
+            text-align: left;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .messages-nav a i,
+        .messages-nav button i {
+            width: 16px;
+            color: #a9c0e6;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .messages-nav a:hover,
+        .messages-nav button:hover {
+            background: rgba(255, 255, 255, .06);
+            color: #fff;
+        }
+
+        .messages-nav a.active {
+            background: #1765ef;
+            color: #fff;
+        }
+
+        .messages-nav a.active i,
+        .messages-nav a:hover i,
+        .messages-nav button:hover i { color: #fff; }
+
+        .messages-nav button:disabled { opacity: .6; cursor: wait; }
+        .messages-nav .logout-link { color: #fca5a5; }
+
+        .messages-sidebar-footer {
+            margin-top: auto;
+            padding: 12px 8px 0;
+            border-top: 1px solid rgba(148, 163, 184, .16);
+            color: #a9c0e6;
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+        .messages-sidebar-footer strong { display: block; color: #fff; }
+
+        .messages-main {
+            width: min(1120px, calc(100% - 216px));
+            margin-left: max(216px, calc((100vw - 1120px + 216px) / 2));
+            padding: 28px clamp(20px, 3vw, 36px);
+        }
+
+        .messages-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .messages-header h1 {
+            margin: 0;
+            font-size: clamp(25px, 2.6vw, 32px);
+            letter-spacing: -.05em;
+            text-align: left;
+        }
+
+        .messages-header p {
+            margin: 6px 0 0;
+            color: var(--message-muted);
+            font-size: 13px;
+        }
+
+        .header-tools { display: flex; align-items: center; gap: 10px; }
+
+        .current-user {
+            padding: 8px 12px;
+            border: 1px solid var(--message-line);
+            border-radius: 999px;
+            background: var(--message-card);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .message-tabs {
+            display: flex;
+            gap: 22px;
+            margin-bottom: 18px;
+            overflow-x: auto;
+            border-bottom: 1px solid var(--message-line);
+        }
+
+        .message-tab {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 42px;
+            padding: 0 2px;
+            border: 0;
+            border-bottom: 2px solid transparent;
+            border-radius: 0;
+            background: transparent;
+            color: var(--message-muted);
+            font: inherit;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .message-tab[aria-selected="true"] {
+            border-bottom-color: var(--message-primary);
+            color: var(--message-primary);
+        }
+
+        .message-tab-count {
+            min-width: 19px;
+            padding: 2px 5px;
+            border-radius: 99px;
+            background: rgba(100, 116, 139, .12);
+            font-size: 10px;
+            text-align: center;
+        }
+
+        .message-tab[aria-selected="true"] .message-tab-count { background: var(--message-soft); }
+
+        .messages-panel {
+            padding: clamp(18px, 3vw, 28px);
+            border: 1px solid var(--message-line);
+            border-radius: 12px;
+            background: var(--message-card);
+            box-shadow: 0 8px 24px rgba(15, 23, 42, .045);
+        }
+
+        .panel-heading {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .panel-heading h2 { margin: 0; font-size: 19px; letter-spacing: -.035em; }
+        .panel-heading p { margin: 6px 0 0; color: var(--message-muted); font-size: 12px; line-height: 1.5; }
+
+        .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+
+        .toolbar input {
+            width: min(250px, 100%);
+            min-height: 34px;
+            padding: 0 11px;
+            border: 1px solid var(--message-line);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.75);
+            color: var(--message-text);
+            font: inherit;
+            font-size: 12px;
+        }
+
+        .toolbar select {
+            min-height: 34px;
+            padding: 0 30px 0 10px;
+            border: 1px solid var(--message-line);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.75);
+            color: var(--message-text);
+            font: inherit;
+            font-size: 12px;
+        }
+
+        .filter-button,
+        .refresh-button {
+            min-height: 34px;
+            padding: 0 11px;
+            border: 1px solid var(--message-line);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.75);
+            color: var(--message-text);
+            font: inherit;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .filter-button[aria-pressed="true"] { border-color: #93c5fd; background: #eff6ff; color: #1d4ed8; }
+        .refresh-button { color: var(--message-primary); }
+
+        .message-list { display: grid; gap: 10px; }
+
+        .message-item {
+            display: grid;
+            grid-template-columns: 38px minmax(0, 1fr) auto;
+            gap: 12px;
+            align-items: start;
+            padding: 15px;
+            border: 1px solid var(--message-line);
+            border-radius: 11px;
+            background: var(--message-card);
+            transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease;
+        }
+
+        .message-item:hover {
+            border-color: #cbd8eb;
+            box-shadow: 0 5px 16px rgba(15, 23, 42, .045);
+            transform: translateY(-1px);
+        }
+
+        .message-item.unread {
+            border-left: 3px solid #3b82f6;
+            background: linear-gradient(90deg, rgba(239, 246, 255, .55), var(--message-card) 28%);
+        }
+
+        .message-icon {
+            display: grid;
+            width: 36px;
+            height: 36px;
+            place-items: center;
+            border-radius: 50%;
+            background: var(--message-soft);
+            color: #2563eb;
+            font-size: 0.78rem;
+        }
+
+        .message-content { min-width: 0; }
+        .message-subject { margin: 0 0 5px; font-size: 14px; font-weight: 800; letter-spacing: -.01em; }
+        .message-sender { color: var(--message-text); font-size: 12px; font-weight: 700; }
+        .message-meta { margin-top: 6px; color: var(--message-muted); font-size: 10px; }
+        .message-body { margin: 11px 0 0; color: var(--message-muted); font-size: 12px; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
+        .message-state {
+            display: inline-block;
+            margin-left: 7px;
+            padding: 3px 7px;
+            border-radius: 99px;
+            background: #fff7ed;
+            color: #b45309;
+            font-size: 9px;
+            font-weight: 800;
+        }
+        .message-item:not(.unread) .message-state { background: #ecfdf5; color: #15803d; }
+        .message-item .message-state.priority-urgent { background: #fef2f2; color: #b91c1c; }
+        .message-item .message-state.priority-normal { background: #eff6ff; color: #1d4ed8; }
+        .message-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 7px; }
+
+        .reply-thread {
+            grid-column: 2 / -1;
+            display: grid;
+            gap: 10px;
+            min-width: 0;
+            padding-top: 10px;
+            border-top: 1px solid var(--message-line);
+        }
+
+        .reply-list { display: grid; gap: 8px; }
+        .reply-item { padding: 9px 11px; border-radius: 8px; background: var(--message-soft); }
+        .reply-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; color: var(--message-muted); font-size: 10px; }
+        .reply-heading strong { color: var(--message-text); font-size: 11px; }
+        .reply-body { margin: 5px 0 0; color: var(--message-text); font-size: 12px; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
+        .reply-receipt { margin-left: auto; color: var(--message-primary); font-weight: 700; }
+        .reply-form { display: flex; align-items: flex-end; gap: 8px; }
+        .reply-form textarea {
+            flex: 1;
+            min-width: 0;
+            min-height: 42px;
+            max-height: 120px;
+            padding: 10px 11px;
+            border: 1px solid var(--message-line);
+            border-radius: 8px;
+            background: var(--message-card);
+            color: var(--message-text);
+            font: inherit;
+            font-size: 12px;
+            resize: vertical;
+        }
+        .reply-form button { flex-shrink: 0; }
+
+        .action-button {
+            min-height: 32px;
+            padding: 0 9px;
+            border: 1px solid var(--message-line);
+            border-radius: 7px;
+            background: var(--message-card);
+            color: var(--message-text);
+            font: inherit;
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .action-button:hover { border-color: var(--message-primary); color: var(--message-primary); }
+        .action-button.danger:hover { border-color: #ef4444; color: #b91c1c; }
+        .action-button:disabled { opacity: .6; cursor: wait; }
+
+        .empty-state {
+            padding: 36px 16px;
+            border: 1px dashed var(--message-line);
+            border-radius: 10px;
+            color: var(--message-muted);
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .empty-state i { display: block; margin-bottom: 10px; color: #94a3b8; font-size: 22px; }
+
+        .compose-layout { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(220px, .8fr); gap: 24px; }
+        .compose-form { display: grid; gap: 16px; }
+        .compose-form label { display: grid; gap: 8px; color: var(--message-text); font-size: 12px; font-weight: 750; }
+        .compose-form input,
+        .compose-form select,
+        .compose-form textarea {
+            width: 100%;
+            min-height: 44px;
+            padding: 11px 13px;
+            border: 1px solid var(--message-line);
+            border-radius: 9px;
+            background: var(--message-card);
+            color: var(--message-text);
+            font: inherit;
+            font-size: 13px;
+            transition: border-color .15s ease, box-shadow .15s ease;
+        }
+
+        .compose-form input::placeholder,
+        .compose-form textarea::placeholder { color: #94a3b8; }
+        .compose-form input:focus,
+        .compose-form select:focus,
+        .compose-form textarea:focus,
+        .toolbar input:focus {
+            outline: none;
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, .12);
+        }
+
+        .compose-form textarea { min-height: 160px; resize: vertical; line-height: 1.6; }
+        .compose-form [maxlength] { resize: vertical; }
+        .compose-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+        .character-count { color: var(--message-muted); font-size: 11px; }
+        .send-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 40px;
+            padding: 0 15px;
+            border: 0;
+            border-radius: 9px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #fff;
+            font: inherit;
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 8px 16px rgba(37, 99, 235, 0.16);
+        }
+
+        .send-button:disabled { opacity: .65; cursor: wait; }
+        .compose-note { align-self: start; padding: 18px; border: 1px solid #dbeafe; border-radius: 10px; background: #eff6ff; color: #1e3a8a; font-size: 12px; line-height: 1.7; }
+        .compose-note strong { display: block; margin-bottom: 8px; font-size: 13px; }
+
+        .status-message { display: none; margin-top: 14px; padding: 11px 13px; border-radius: 8px; font-size: 12px; font-weight: 700; }
+        .status-message.success { display: block; background: #ecfdf5; color: #166534; }
+        .status-message.error { display: block; background: #fef2f2; color: #991b1b; }
+
+        .hidden { display: none !important; }
+
+        :root[data-theme="dark"] {
+            --message-bg: #0d1729;
+            --message-card: #142137;
+            --message-text: #edf3ff;
+            --message-muted: #9aabc5;
+            --message-line: #2a3b58;
+            --message-nav: #0a1426;
+        }
+
+        :root[data-theme="dark"] .message-tab,
+        :root[data-theme="dark"] .messages-panel,
+        :root[data-theme="dark"] .message-item,
+        :root[data-theme="dark"] .toolbar input,
+        :root[data-theme="dark"] .filter-button,
+        :root[data-theme="dark"] .refresh-button,
+        :root[data-theme="dark"] .action-button,
+        :root[data-theme="dark"] .compose-form input,
+        :root[data-theme="dark"] .compose-form select,
+        :root[data-theme="dark"] .compose-form textarea,
+        :root[data-theme="dark"] .current-user,
+        :root[data-theme="dark"] .toolbar select,
+        :root[data-theme="dark"] .reply-form textarea {
+            background: var(--message-card);
+            color: var(--message-text);
+        }
+
+        :root[data-theme="dark"] .message-tab[aria-selected="true"] {
+            border-bottom-color: #60a5fa;
+            background: transparent;
+            color: #93c5fd;
+        }
+
+        :root[data-theme="dark"] .message-icon,
+        :root[data-theme="dark"] .compose-note { background: #1b3153; color: #bfdbfe; }
+        :root[data-theme="dark"] .compose-note { border: 1px solid #2a4771; }
+        :root[data-theme="dark"] .message-item.unread { background: linear-gradient(90deg, rgba(27, 49, 83, .65), var(--message-card) 34%); }
+        :root[data-theme="dark"] .message-state { background: #452d1a; color: #fdba74; }
+        :root[data-theme="dark"] .message-item:not(.unread) .message-state { background: #123525; color: #86efac; }
+        :root[data-theme="dark"] .reply-item { background: #1b3153; }
+        :root[data-theme="dark"] .message-item .message-state.priority-urgent { background: #3b1f2a; color: #fca5a5; }
+        :root[data-theme="dark"] .message-item .message-state.priority-normal { background: #1b3153; color: #bfdbfe; }
+        :root[data-theme="dark"] .filter-button[aria-pressed="true"] { background: #1b3153; color: #bfdbfe; border-color: #3b5f94; }
+        :root[data-theme="dark"] .status-message.success { background: #123525; color: #86efac; }
+        :root[data-theme="dark"] .status-message.error { background: #3b1f2a; color: #fca5a5; }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+        }
+
+        @media (max-width: 760px) {
+            .messages-sidebar { position: static; width: 100%; padding: 10px 14px; }
+            .messages-brand { padding-bottom: 10px; }
+            .messages-nav-label, .messages-sidebar-footer { display: none; }
+            .messages-nav { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 4px; padding-top: 8px; }
+            .messages-nav a, .messages-nav button { width: 100%; min-width: 0; min-height: 34px; padding: 7px 8px; gap: 7px; white-space: nowrap; }
+            .messages-main { width: 100%; margin: 0; padding: 22px 16px; }
+            .compose-layout { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 520px) {
+            .messages-header { align-items: flex-start; flex-direction: column; }
+            .header-tools { width: 100%; justify-content: space-between; }
+            .message-tabs { gap: 17px; }
+            .message-item { grid-template-columns: 34px minmax(0, 1fr); gap: 9px; padding: 12px; }
+            .message-icon { width: 32px; height: 32px; }
+            .message-actions { grid-column: 2; justify-content: flex-start; }
+            .toolbar { align-items: stretch; }
+            .toolbar input { width: 100%; }
+            .toolbar select { flex: 1; }
+            .messages-panel { padding: 15px 13px; }
+            .panel-heading { align-items: flex-start; }
+            .compose-footer { align-items: stretch; flex-direction: column; }
+            .send-button { width: 100%; }
+            .reply-form { align-items: stretch; flex-direction: column; }
+            .reply-form .send-button { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="messages-app">
+        <aside class="messages-sidebar" aria-label="Main navigation">
+            <a id="messagesBrand" class="messages-brand" href="attendance.html"><i class="fa-solid fa-graduation-cap" aria-hidden="true"></i> SmartSchool</a>
+            <div class="messages-nav-label">School menu</div>
+            <nav class="messages-nav">
+                <a href="admin.html" data-role-link="admin"><i class="fa-solid fa-house"></i> Dashboard</a>
+                <a href="super-admin.html" data-role-link="super_admin"><i class="fa-solid fa-user-shield"></i> Super Admin</a>
+                <a href="attendance.html"><i class="fa-solid fa-calendar-check"></i> Attendance</a>
+                <a href="teachers.html" data-role-link="admin"><i class="fa-solid fa-users"></i> Teachers</a>
+                <a href="report.html"><i class="fa-solid fa-chart-column"></i> Daily Report</a>
+                <a href="monthly_report.html"><i class="fa-solid fa-book-open"></i> Monthly Report</a>
+                <a href="messages.html" class="active" aria-current="page"><i class="fa-solid fa-message"></i> Messages</a>
+                <a href="settings.html" data-role-link="super_admin"><i class="fa-solid fa-gear"></i> Settings</a>
+            </nav>
+            <div class="messages-nav-label" data-role-link="admin">Admin tools</div>
+            <nav class="messages-nav" data-role-link="admin">
+                <a href="admin-builder.html"><i class="fa-solid fa-user-gear"></i> Manage Staff</a>
+            </nav>
+            <div class="messages-nav-label">Account</div>
+            <nav class="messages-nav">
+                <button id="sidebarThemeToggle" type="button" data-theme-toggle>
+                    <i class="fa-solid fa-moon" aria-hidden="true"></i><span>Dark mode</span>
+                </button>
+                <button id="logoutButton" class="logout-link" type="button">
+                    <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i><span>Log out</span>
+                </button>
+            </nav>
+            <div class="messages-sidebar-footer"><strong>Better Education</strong>Brighter Future</div>
+        </aside>
+
+        <main class="messages-main">
+            <header class="messages-header">
+                <div>
+                    <h1>Messages</h1>
+                    <p id="pageDescription">Your school communication center.</p>
+                </div>
+                <div class="header-tools">
+                    <span id="currentUser" class="current-user">Loading account...</span>
+                </div>
+            </header>
+
+            <div id="pageError" class="status-message error hidden" role="alert"></div>
+
+            <section id="teacherView" class="hidden">
+                <div class="message-tabs" role="tablist" aria-label="Teacher messages">
+                    <button class="message-tab" id="composeTab" type="button" role="tab" aria-selected="true" aria-controls="composePanel">
+                        <i class="fa-solid fa-pen"></i> Compose
+                    </button>
+                    <button class="message-tab" id="sentTab" type="button" role="tab" aria-selected="false" aria-controls="sentPanel">
+                        <i class="fa-solid fa-paper-plane"></i> Sent <span id="sentCount" class="message-tab-count">0</span>
+                    </button>
+                </div>
+
+                <section id="composePanel" class="messages-panel" role="tabpanel" aria-labelledby="composeTab">
+                    <div class="panel-heading">
+                        <div><h2>Write a message</h2><p>Send a report to administrators or a note directly to the super admin.</p></div>
+                    </div>
+                    <div class="compose-layout">
+                        <form id="teacherComposeForm" class="compose-form">
+                            <label for="teacherMessageType">Send to
+                                <select id="teacherMessageType" required>
+                                    <option value="teacher">Admin team</option>
+                                    <option value="notification">Super Admin</option>
+                                </select>
+                            </label>
+                            <label for="teacherPriority">Priority
+                                <select id="teacherPriority">
+                                    <option value="normal">Normal</option>
+                                    <option value="urgent">Urgent</option>
+                                </select>
+                            </label>
+                            <label for="teacherSubject">Subject
+                                <input id="teacherSubject" type="text" maxlength="120" placeholder="Short subject (optional)">
+                            </label>
+                            <label for="teacherMessage">Message
+                                <textarea id="teacherMessage" maxlength="2000" required placeholder="Write your message..."></textarea>
+                            </label>
+                            <div class="compose-footer">
+                                <span id="teacherCharacterCount" class="character-count">0 / 2000</span>
+                                <button id="teacherSendButton" class="send-button" type="submit"><i class="fa-solid fa-paper-plane"></i> Send message</button>
+                            </div>
+                            <div id="teacherComposeStatus" class="status-message" role="status" aria-live="polite"></div>
+                        </form>
+                        <aside class="compose-note">
+                            <strong><i class="fa-solid fa-circle-info"></i> Sending safely</strong>
+                            Reports sent to the admin team appear in the admin inbox. Notes to the super admin appear in the system notification list.
+                        </aside>
+                    </div>
+                </section>
+
+                <section id="sentPanel" class="messages-panel hidden" role="tabpanel" aria-labelledby="sentTab">
+                    <div class="panel-heading">
+                        <div><h2>Sent messages</h2><p>Messages and reports you have submitted.</p></div>
+                        <button id="refreshSent" class="refresh-button" type="button"><i class="fa-solid fa-rotate"></i> Refresh</button>
+                    </div>
+                    <div id="sentMessages" class="message-list" aria-live="polite"></div>
+                </section>
+            </section>
+
+            <section id="adminView" class="hidden">
+                <div class="message-tabs" role="tablist" aria-label="Message inbox">
+                    <button class="message-tab" id="inboxTab" type="button" role="tab" aria-selected="true" aria-controls="inboxPanel">
+                        <i class="fa-solid fa-inbox"></i> Teacher inbox <span id="inboxCount" class="message-tab-count">0</span>
+                    </button>
+                    <button class="message-tab" id="notificationsTab" type="button" role="tab" aria-selected="false" aria-controls="notificationsPanel">
+                        <i class="fa-solid fa-bell"></i> Notifications <span id="notificationCount" class="message-tab-count">0</span>
+                    </button>
+                    <button id="announcementTab" class="message-tab hidden" type="button" role="tab" aria-selected="false" aria-controls="announcementPanel">
+                        <i class="fa-solid fa-bullhorn"></i> New announcement
+                    </button>
+                </div>
+
+                <section id="inboxPanel" class="messages-panel" role="tabpanel" aria-labelledby="inboxTab">
+                    <div class="panel-heading">
+                        <div><h2>Teacher messages</h2><p>Review incoming reports and requests from staff.</p></div>
+                        <button id="refreshInbox" class="refresh-button" type="button"><i class="fa-solid fa-rotate"></i> Refresh</button>
+                    </div>
+                    <div class="toolbar" role="group" aria-label="Filter messages">
+                        <input id="messageSearch" type="search" placeholder="Search messages..." aria-label="Search messages">
+                        <select id="priorityFilter" aria-label="Filter by priority">
+                            <option value="all">All priorities</option>
+                            <option value="urgent">Urgent</option>
+                            <option value="normal">Normal</option>
+                        </select>
+                        <select id="messageSort" aria-label="Sort messages">
+                            <option value="newest">Newest first</option>
+                            <option value="oldest">Oldest first</option>
+                            <option value="priority">Urgent first</option>
+                        </select>
+                        <button class="filter-button" type="button" data-filter="all" aria-pressed="true">All</button>
+                        <button class="filter-button" type="button" data-filter="new" aria-pressed="false">Needs review</button>
+                        <button class="filter-button" type="button" data-filter="reviewed" aria-pressed="false">Reviewed</button>
+                    </div>
+                    <div id="teacherInbox" class="message-list" aria-live="polite" style="margin-top:14px"></div>
+                </section>
+
+                <section id="notificationsPanel" class="messages-panel hidden" role="tabpanel" aria-labelledby="notificationsTab">
+                    <div class="panel-heading">
+                        <div><h2>System notifications</h2><p>Announcements and notes sent to the school.</p></div>
+                        <button id="refreshNotifications" class="refresh-button" type="button"><i class="fa-solid fa-rotate"></i> Refresh</button>
+                    </div>
+                    <div id="systemNotifications" class="message-list" aria-live="polite"></div>
+                </section>
+
+                <section id="announcementPanel" class="messages-panel hidden" role="tabpanel" aria-labelledby="announcementTab">
+                    <div class="panel-heading">
+                        <div><h2>Send a system announcement</h2><p>This notification will be visible to signed-in users.</p></div>
+                    </div>
+                    <form id="announcementForm" class="compose-form">
+                        <label for="announcementPriority">Priority
+                            <select id="announcementPriority">
+                                <option value="normal">Normal</option>
+                                <option value="urgent">Urgent</option>
+                            </select>
+                        </label>
+                        <label for="announcementText">Announcement
+                            <textarea id="announcementText" maxlength="2000" required placeholder="Write the announcement for staff..."></textarea>
+                        </label>
+                        <div class="compose-footer">
+                            <span id="announcementCharacterCount" class="character-count">0 / 2000</span>
+                            <button id="announcementSendButton" class="send-button" type="submit"><i class="fa-solid fa-bullhorn"></i> Publish announcement</button>
+                        </div>
+                        <div id="announcementStatus" class="status-message" role="status" aria-live="polite"></div>
+                    </form>
+                </section>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const teacherView = document.getElementById('teacherView');
+        const adminView = document.getElementById('adminView');
+        const teacherInbox = document.getElementById('teacherInbox');
+        const sentMessages = document.getElementById('sentMessages');
+        const systemNotifications = document.getElementById('systemNotifications');
+        let currentRole = '';
+        let teacherMessages = [];
+        let sentItems = [];
+        let notifications = [];
+        let inboxFilter = 'all';
+
+        function showStatus(element, text, type) {
+            element.textContent = text;
+            element.className = `status-message ${type}`;
+        }
+
+        async function requestJson(url, options = {}) {
+            const response = await fetch(url, {
+                cache: 'no-store',
+                ...options,
+                headers: { Accept: 'application/json', ...(options.headers || {}) }
+            });
+            let data;
+            try {
+                data = await response.json();
+            } catch (error) {
+                throw new Error('The server returned an unreadable response.');
+            }
+            if (!response.ok) throw new Error(data.message || 'The request could not be completed.');
+            return data;
+        }
+
+        function formatDate(value) {
+            const date = new Date(value);
+            return Number.isNaN(date.getTime()) ? 'Date unavailable' : date.toLocaleString();
+        }
+
+        function makeEmpty(container, text, icon = 'fa-inbox') {
+            const empty = document.createElement('div');
+            empty.className = 'empty-state';
+            const iconElement = document.createElement('i');
+            iconElement.className = `fa-solid ${icon}`;
+            iconElement.setAttribute('aria-hidden', 'true');
+            const copy = document.createElement('span');
+            copy.textContent = text;
+            empty.append(iconElement, copy);
+            container.replaceChildren(empty);
+        }
+
+        function makeMessageCard(message, options = {}) {
+            const card = document.createElement('article');
+            const isUnread = options.review
+                ? message.status !== 'reviewed'
+                : options.showReceipt && options.notification
+                    ? options.sentNotification ? Number(message.read_count) === 0 : !message.is_read
+                    : Boolean(options.showReceipt && !message.read_by_admin);
+            card.className = `message-item${isUnread ? ' unread' : ''}`;
+            const icon = document.createElement('div');
+            icon.className = 'message-icon';
+            const iconElement = document.createElement('i');
+            iconElement.className = `fa-solid ${options.notification ? 'fa-bell' : 'fa-message'}`;
+            iconElement.setAttribute('aria-hidden', 'true');
+            icon.append(iconElement);
+
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            const subject = document.createElement('h3');
+            subject.className = 'message-subject';
+            subject.textContent = message.subject || (options.notification ? 'System notification' : 'No subject');
+            const sender = document.createElement('div');
+            sender.className = 'message-sender';
+            const role = String(message.sender_role || '').replace(/[_-]/g, ' ');
+            sender.textContent = `${message.sender_name || 'System'}${role ? ` · ${role}` : ''}`;
+            const meta = document.createElement('div');
+            meta.className = 'message-meta';
+            meta.textContent = formatDate(message.created_at);
+            if (message.priority) {
+                const priority = document.createElement('span');
+                priority.className = `message-state priority-${message.priority === 'urgent' ? 'urgent' : 'normal'}`;
+                priority.textContent = message.priority === 'urgent' ? 'Urgent' : 'Normal';
+                meta.append(priority);
+            }
+            if (options.review && message.status) {
+                const state = document.createElement('span');
+                state.className = 'message-state';
+                state.textContent = message.status === 'reviewed' ? 'Reviewed' : 'Needs review';
+                meta.append(state);
+            } else if (options.showReceipt && options.notification) {
+                const receipt = document.createElement('span');
+                receipt.className = 'message-state';
+                receipt.textContent = options.sentNotification
+                    ? `Seen by ${Number(message.read_count) || 0}`
+                    : message.is_read ? 'Read' : 'Unread';
+                meta.append(receipt);
+            } else if (options.showReceipt && !options.notification) {
+                const receipt = document.createElement('span');
+                receipt.className = 'message-state';
+                receipt.textContent = message.read_by_admin ? 'Read by admin' : 'Unread by admin';
+                meta.append(receipt);
+            }
+            const body = document.createElement('p');
+            body.className = 'message-body';
+            body.textContent = message.message || '';
+            content.append(subject, sender, meta, body);
+
+            const actions = document.createElement('div');
+            actions.className = 'message-actions';
+            if (options.review && message.status !== 'reviewed') {
+                const review = document.createElement('button');
+                review.type = 'button';
+                review.className = 'action-button';
+                review.innerHTML = '<i class="fa-solid fa-check" aria-hidden="true"></i> Mark reviewed';
+                review.addEventListener('click', () => reviewMessage(message.id, review));
+                actions.append(review);
+            } else if (options.review && message.status === 'reviewed') {
+                const remove = document.createElement('button');
+                remove.type = 'button';
+                remove.className = 'action-button danger';
+                remove.innerHTML = '<i class="fa-solid fa-trash" aria-hidden="true"></i> Delete';
+                remove.addEventListener('click', () => deleteTeacherMessage(message.id, remove));
+                actions.append(remove);
+            }
+
+            if (options.deleteNotification) {
+                const remove = document.createElement('button');
+                remove.type = 'button';
+                remove.className = 'action-button danger';
+                remove.innerHTML = '<i class="fa-solid fa-trash" aria-hidden="true"></i> Delete';
+                remove.addEventListener('click', () => deleteNotification(message.id, remove));
+                actions.append(remove);
+            }
+
+            card.append(icon, content, actions);
+
+            const replies = Array.isArray(message.replies) ? message.replies : [];
+            if (replies.length || options.allowReplies) {
+                const thread = document.createElement('div');
+                thread.className = 'reply-thread';
+                if (replies.length) {
+                    const replyList = document.createElement('div');
+                    replyList.className = 'reply-list';
+                    replies.forEach(reply => {
+                        const item = document.createElement('article');
+                        item.className = 'reply-item';
+                        const heading = document.createElement('div');
+                        heading.className = 'reply-heading';
+                        const name = document.createElement('strong');
+                        name.textContent = reply.sender_name || 'User';
+                        const roleLabel = document.createElement('span');
+                        roleLabel.textContent = String(reply.sender_role || '').replace(/[_-]/g, ' ');
+                        const time = document.createElement('time');
+                        time.dateTime = reply.created_at || '';
+                        time.textContent = formatDate(reply.created_at);
+                        heading.append(name, roleLabel, time);
+                        if (options.showReceipt && reply.sender_role !== 'teacher' && reply.read_by_teacher) {
+                            const receipt = document.createElement('span');
+                            receipt.className = 'reply-receipt';
+                            receipt.textContent = 'Seen';
+                            heading.append(receipt);
+                        } else if (options.review && reply.sender_role === 'teacher' && reply.read_by_admin) {
+                            const receipt = document.createElement('span');
+                            receipt.className = 'reply-receipt';
+                            receipt.textContent = 'Read';
+                            heading.append(receipt);
+                        }
+                        const replyBody = document.createElement('p');
+                        replyBody.className = 'reply-body';
+                        replyBody.textContent = reply.message || '';
+                        item.append(heading, replyBody);
+                        replyList.append(item);
+                    });
+                    thread.append(replyList);
+                }
+                if (options.allowReplies) {
+                    const form = document.createElement('form');
+                    form.className = 'reply-form';
+                    const textarea = document.createElement('textarea');
+                    textarea.maxLength = 2000;
+                    textarea.required = true;
+                    textarea.placeholder = 'Write a reply...';
+                    textarea.setAttribute('aria-label', 'Write a reply');
+                    const send = document.createElement('button');
+                    send.type = 'submit';
+                    send.className = 'send-button';
+                    send.innerHTML = '<i class="fa-solid fa-paper-plane" aria-hidden="true"></i> Reply';
+                    form.append(textarea, send);
+                    form.addEventListener('submit', event => {
+                        event.preventDefault();
+                        sendReply(message.id, textarea, send);
+                    });
+                    thread.append(form);
+                }
+                card.append(thread);
+            }
+            return card;
+        }
+
+        async function loadSession() {
+            const session = await requestJson('/api/session');
+            currentRole = String(session.role || '').replace(/-/g, '_');
+            document.getElementById('currentUser').textContent = `${session.name || 'User'} · ${currentRole.replace(/_/g, ' ')}`;
+            document.title = 'SmartSchool | Messages';
+            document.getElementById('messagesBrand').href = currentRole === 'super_admin'
+                ? 'super-admin.html'
+                : currentRole === 'admin' ? 'admin.html' : 'attendance.html';
+
+            document.querySelectorAll('[data-role-link="admin"]').forEach(link => {
+                if (currentRole !== 'admin' && currentRole !== 'super_admin') link.remove();
+            });
+            document.querySelectorAll('[data-role-link="super_admin"]').forEach(link => {
+                if (currentRole !== 'super_admin') link.remove();
+            });
+
+            if (currentRole === 'teacher') {
+                teacherView.classList.remove('hidden');
+                document.getElementById('pageDescription').textContent = 'Send a report and track messages you have sent.';
+                await loadSentMessages();
+            } else if (currentRole === 'admin' || currentRole === 'super_admin') {
+                adminView.classList.remove('hidden');
+                document.getElementById('pageDescription').textContent = 'Review teacher messages and keep up with school notifications.';
+                if (currentRole === 'super_admin') document.getElementById('announcementTab').classList.remove('hidden');
+                await Promise.all([loadTeacherInbox(), loadNotifications()]);
+            } else {
+                throw new Error('Your account does not have access to messaging.');
+            }
+        }
+
+        async function loadTeacherInbox() {
+            teacherInbox.setAttribute('aria-busy', 'true');
+            try {
+                const records = await requestJson('/messages/teacher');
+                teacherMessages = Array.isArray(records) ? records : [];
+                document.getElementById('inboxCount').textContent = String(teacherMessages.filter(item => item.status !== 'reviewed').length);
+                renderTeacherInbox();
+            } finally {
+                teacherInbox.removeAttribute('aria-busy');
+            }
+        }
+
+        function renderTeacherInbox() {
+            const search = document.getElementById('messageSearch').value.trim().toLowerCase();
+            const selectedPriority = document.getElementById('priorityFilter').value;
+            const sortBy = document.getElementById('messageSort').value;
+            const visible = teacherMessages.filter(message => {
+                if (inboxFilter === 'new' && message.status === 'reviewed') return false;
+                if (inboxFilter === 'reviewed' && message.status !== 'reviewed') return false;
+                if (selectedPriority !== 'all' && (message.priority || 'normal') !== selectedPriority) return false;
+                const searchable = [
+                    message.sender_name,
+                    message.subject,
+                    message.message,
+                    ...(Array.isArray(message.replies) ? message.replies.map(reply => reply.message) : [])
+                ].join(' ').toLowerCase();
+                return !search || searchable.includes(search);
+            });
+
+            visible.sort((first, second) => {
+                if (sortBy === 'priority') {
+                    const priorityOrder = (second.priority === 'urgent' ? 1 : 0) - (first.priority === 'urgent' ? 1 : 0);
+                    if (priorityOrder) return priorityOrder;
+                }
+                const dateOrder = new Date(second.created_at).getTime() - new Date(first.created_at).getTime();
+                return sortBy === 'oldest' ? -dateOrder : dateOrder;
+            });
+
+            if (!visible.length) {
+                makeEmpty(teacherInbox, teacherMessages.length ? 'No messages match this filter.' : 'No teacher messages yet.');
+                return;
+            }
+            teacherInbox.replaceChildren(...visible.map(message => makeMessageCard(message, { review: true, allowReplies: true })));
+        }
+
+        async function loadNotifications() {
+            systemNotifications.setAttribute('aria-busy', 'true');
+            try {
+                const records = await requestJson('/messages/notification');
+                notifications = Array.isArray(records) ? records : [];
+                const unreadNotifications = notifications.filter(message => !message.is_read).length;
+                document.getElementById('notificationCount').textContent = String(unreadNotifications);
+                if (!notifications.length) {
+                    makeEmpty(systemNotifications, 'No system notifications yet.', 'fa-bell');
+                    return;
+                }
+                systemNotifications.replaceChildren(...notifications.map(message => makeMessageCard(message, {
+                    notification: true,
+                    showReceipt: true,
+                    deleteNotification: currentRole === 'super_admin'
+                })));
+            } finally {
+                systemNotifications.removeAttribute('aria-busy');
+            }
+        }
+
+        async function loadSentMessages() {
+            sentMessages.setAttribute('aria-busy', 'true');
+            try {
+                const records = await requestJson('/messages/teacher/sent');
+                sentItems = Array.isArray(records) ? records : [];
+                document.getElementById('sentCount').textContent = String(sentItems.length);
+                if (!sentItems.length) {
+                    makeEmpty(sentMessages, 'You have not sent any messages yet.', 'fa-paper-plane');
+                    return;
+                }
+                sentMessages.replaceChildren(...sentItems.map(message => makeMessageCard(message, {
+                    notification: message.type === 'notification',
+                    showReceipt: true,
+                    sentNotification: message.type === 'notification',
+                    allowReplies: message.type === 'teacher'
+                })));
+            } finally {
+                sentMessages.removeAttribute('aria-busy');
+            }
+        }
+
+        async function reviewMessage(id, button) {
+            button.disabled = true;
+            try {
+                await requestJson(`/messages/teacher/${encodeURIComponent(id)}/review`, { method: 'PATCH' });
+                await loadTeacherInbox();
+            } catch (error) {
+                window.alert(error.message);
+                button.disabled = false;
+            }
+        }
+
+        async function sendReply(id, textarea, button) {
+            const message = textarea.value.trim();
+            if (!message) {
+                textarea.focus();
+                return;
+            }
+            button.disabled = true;
+            try {
+                await requestJson(`/messages/teacher/${encodeURIComponent(id)}/replies`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+                if (currentRole === 'teacher') await loadSentMessages();
+                else await loadTeacherInbox();
+            } catch (error) {
+                window.alert(error.message);
+                button.disabled = false;
+            }
+        }
+
+        async function deleteTeacherMessage(id, button) {
+            if (!window.confirm('Delete this reviewed message? This cannot be undone.')) return;
+            button.disabled = true;
+            try {
+                await requestJson(`/messages/teacher/${encodeURIComponent(id)}`, { method: 'DELETE' });
+                await loadTeacherInbox();
+            } catch (error) {
+                window.alert(error.message);
+                button.disabled = false;
+            }
+        }
+
+        async function deleteNotification(id, button) {
+            if (!window.confirm('Delete this system notification? This cannot be undone.')) return;
+            button.disabled = true;
+            try {
+                await requestJson(`/messages/notification/${encodeURIComponent(id)}`, { method: 'DELETE' });
+                await loadNotifications();
+            } catch (error) {
+                window.alert(error.message);
+                button.disabled = false;
+            }
+        }
+
+        function activateTab(button, panel, allButtons, allPanels) {
+            allButtons.forEach(tab => tab.setAttribute('aria-selected', String(tab === button)));
+            allPanels.forEach(section => section.classList.toggle('hidden', section !== panel));
+        }
+
+        const composeTab = document.getElementById('composeTab');
+        const sentTab = document.getElementById('sentTab');
+        composeTab.addEventListener('click', () => activateTab(composeTab, document.getElementById('composePanel'), [composeTab, sentTab], [document.getElementById('composePanel'), document.getElementById('sentPanel')]));
+        sentTab.addEventListener('click', async () => {
+            activateTab(sentTab, document.getElementById('sentPanel'), [composeTab, sentTab], [document.getElementById('composePanel'), document.getElementById('sentPanel')]);
+            try { await loadSentMessages(); } catch (error) { makeEmpty(sentMessages, error.message, 'fa-triangle-exclamation'); }
+        });
+
+        const inboxTab = document.getElementById('inboxTab');
+        const notificationsTab = document.getElementById('notificationsTab');
+        const announcementTab = document.getElementById('announcementTab');
+        const inboxPanel = document.getElementById('inboxPanel');
+        const notificationsPanel = document.getElementById('notificationsPanel');
+        const announcementPanel = document.getElementById('announcementPanel');
+        const adminTabs = [inboxTab, notificationsTab, announcementTab];
+        const adminPanels = [inboxPanel, notificationsPanel, announcementPanel];
+        inboxTab.addEventListener('click', () => activateTab(inboxTab, inboxPanel, adminTabs, adminPanels));
+        notificationsTab.addEventListener('click', () => {
+            activateTab(notificationsTab, notificationsPanel, adminTabs, adminPanels);
+            requestJson('/messages/notification/read', { method: 'PATCH' })
+                .then(() => loadNotifications())
+                .catch(error => makeEmpty(systemNotifications, error.message, 'fa-triangle-exclamation'));
+        });
+        announcementTab.addEventListener('click', () => activateTab(announcementTab, announcementPanel, adminTabs, adminPanels));
+
+        document.querySelectorAll('[data-filter]').forEach(button => {
+            button.addEventListener('click', () => {
+                inboxFilter = button.dataset.filter;
+                document.querySelectorAll('[data-filter]').forEach(filter => filter.setAttribute('aria-pressed', String(filter === button)));
+                renderTeacherInbox();
+            });
+        });
+        document.getElementById('messageSearch').addEventListener('input', renderTeacherInbox);
+        document.getElementById('priorityFilter').addEventListener('change', renderTeacherInbox);
+        document.getElementById('messageSort').addEventListener('change', renderTeacherInbox);
+        document.getElementById('refreshInbox').addEventListener('click', () => loadTeacherInbox().catch(error => makeEmpty(teacherInbox, error.message, 'fa-triangle-exclamation')));
+        document.getElementById('refreshNotifications').addEventListener('click', () => {
+            requestJson('/messages/notification/read', { method: 'PATCH' })
+                .then(loadNotifications)
+                .catch(error => makeEmpty(systemNotifications, error.message, 'fa-triangle-exclamation'));
+        });
+        document.getElementById('refreshSent').addEventListener('click', () => loadSentMessages().catch(error => makeEmpty(sentMessages, error.message, 'fa-triangle-exclamation')));
+
+        const teacherMessage = document.getElementById('teacherMessage');
+        teacherMessage.addEventListener('input', () => {
+            document.getElementById('teacherCharacterCount').textContent = `${teacherMessage.value.length} / 2000`;
+        });
+
+        document.getElementById('teacherComposeForm').addEventListener('submit', async event => {
+            event.preventDefault();
+            const button = document.getElementById('teacherSendButton');
+            const status = document.getElementById('teacherComposeStatus');
+            const kind = document.getElementById('teacherMessageType').value;
+            const message = teacherMessage.value.trim();
+            if (!message) {
+                showStatus(status, 'Enter a message before sending.', 'error');
+                return;
+            }
+            button.disabled = true;
+            try {
+                const response = await requestJson(kind === 'notification' ? '/messages/notification' : '/messages/teacher', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        subject: document.getElementById('teacherSubject').value.trim(),
+                        message,
+                        priority: document.getElementById('teacherPriority').value
+                    })
+                });
+                showStatus(status, response.message || 'Message sent.', 'success');
+                event.currentTarget.reset();
+                document.getElementById('teacherCharacterCount').textContent = '0 / 2000';
+                await loadSentMessages();
+            } catch (error) {
+                showStatus(status, error.message, 'error');
+            } finally {
+                button.disabled = false;
+            }
+        });
+
+        const announcementText = document.getElementById('announcementText');
+        announcementText.addEventListener('input', () => {
+            document.getElementById('announcementCharacterCount').textContent = `${announcementText.value.length} / 2000`;
+        });
+        document.getElementById('announcementForm').addEventListener('submit', async event => {
+            event.preventDefault();
+            const button = document.getElementById('announcementSendButton');
+            const status = document.getElementById('announcementStatus');
+            const message = announcementText.value.trim();
+            if (!message) {
+                showStatus(status, 'Enter an announcement before publishing.', 'error');
+                return;
+            }
+            button.disabled = true;
+            try {
+                const result = await requestJson('/messages/notification', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message,
+                        priority: document.getElementById('announcementPriority').value
+                    })
+                });
+                showStatus(status, result.message || 'Announcement published.', 'success');
+                event.currentTarget.reset();
+                document.getElementById('announcementCharacterCount').textContent = '0 / 2000';
+                await loadNotifications();
+            } catch (error) {
+                showStatus(status, error.message, 'error');
+            } finally {
+                button.disabled = false;
+            }
+        });
+
+        document.querySelector('[data-theme-toggle]').addEventListener('click', () => {
+            const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+            document.documentElement.dataset.theme = nextTheme;
+            try {
+                localStorage.setItem('smartschool-theme', nextTheme);
+            } catch (error) {
+                console.warn('Could not save the selected theme.', error);
+            }
+        });
+
+        document.getElementById('logoutButton').addEventListener('click', async event => {
+            const button = event.currentTarget;
+            button.disabled = true;
+            try {
+                const response = await fetch('/logout', { method: 'POST' });
+                if (!response.ok) throw new Error('Logout request failed.');
+                window.location.assign('index.html');
+            } catch (error) {
+                console.error('Unable to sign out:', error);
+                window.alert('Unable to sign out. Please try again.');
+                button.disabled = false;
+            }
+        });
+
+        loadSession().catch(error => showStatus(document.getElementById('pageError'), error.message, 'error'));
+    </script>
+    <script src="assets/theme.js"></script>
+</body>
+</html>

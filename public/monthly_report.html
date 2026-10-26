@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Monthly Attendance Report</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/theme.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-strong: #1d4ed8;
+            --bg: #f3f7ff;
+            --panel: rgba(255,255,255,0.9);
+            --panel-soft: #f8fbff;
+            --line: rgba(148,163,184,0.22);
+            --text: #0f172a;
+            --muted: #475569;
+            --success: #16a34a;
+            --danger: #ef4444;
+            --shadow: 0 24px 60px rgba(15, 23, 42, 0.1);
+        }
+
+        *{ margin:0; padding:0; box-sizing:border-box; font-family:"Inter","Segoe UI",sans-serif; }
+
+        body {
+            background:
+                radial-gradient(circle at top left, rgba(37,99,235,0.12), transparent 28%),
+                radial-gradient(circle at bottom right, rgba(14,165,233,0.12), transparent 30%),
+                linear-gradient(135deg, #f4f8ff 0%, var(--bg) 100%);
+            padding: 38px 18px;
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1180px;
+            margin: auto;
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            padding: 28px 26px 24px;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:28px;
+            flex-wrap:wrap;
+            gap:12px;
+        }
+        .header h2 {
+            font-size: clamp(1.9rem, 2.7vw, 2.6rem);
+            color: var(--text);
+            letter-spacing: -0.06em;
+        }
+
+        .actions{ display:flex; gap:10px; flex-wrap:wrap; }
+        .btn {
+            padding: 11px 18px;
+            border-radius: 12px;
+            text-decoration:none;
+            font-weight:700;
+            color:#fff;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-strong) 100%);
+            transition:.2s;
+            border:none;
+            cursor:pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            box-shadow: 0 14px 24px rgba(37,99,235,0.18);
+        }
+        .btn:hover{ opacity: 0.96; transform: translateY(-1px); }
+        .btn.gray{ background: linear-gradient(135deg, #64748b 0%, #475569 100%); box-shadow: none; }
+        .btn.red{ background: linear-gradient(135deg, #f87171 0%, #dc2626 100%); }
+        .btn.green{ background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); }
+
+        .search-box {
+            display:flex;
+            gap:12px;
+            margin-bottom:26px;
+            flex-wrap:wrap;
+            background: rgba(248,250,252,0.95);
+            padding: 16px;
+            border-radius: 18px;
+            border: 1px solid var(--line);
+        }
+        .search-box input {
+            padding: 13px 14px;
+            border-radius: 12px;
+            border:1px solid var(--line);
+            font-size:15px;
+            flex: 1;
+            min-width: 180px;
+            outline: none;
+            transition: 0.2s;
+            background: #fff;
+        }
+        .search-box input:focus{ border-color: var(--primary); box-shadow: 0 0 0 4px rgba(37,99,235,0.1); }
+
+        .table-wrapper { overflow-x: auto; border-radius: 18px; border: 1px solid var(--line); background: rgba(255,255,255,0.75); }
+        table{ width:100%; border-collapse:collapse; background: white; }
+        th{ background: linear-gradient(180deg, #f8fbff 0%, #eef4ff 100%); color: var(--muted); font-weight: 700; padding:15px; text-align:left; border-bottom:1px solid var(--line); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+        td{ padding:15px 16px; text-align:left; border-bottom:1px solid var(--line); font-size: 14px; }
+        tr:last-child td { border-bottom: none; }
+        tr:nth-child(even){ background: rgba(248,250,252,0.5); }
+        tr:hover { background: rgba(37,99,235,0.03); }
+
+        .footer{ margin-top:25px; display:flex; justify-content:space-between; align-items: center; font-weight:600; color: var(--text); padding-top: 15px; border-top: 1px solid var(--line); gap: 10px; flex-wrap: wrap; }
+        .status-onsite { background: rgba(245,158,11,0.12); color: #92400e; padding: 5px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+        .time-in { color: var(--success); font-weight: 700; }
+        .time-out { color: var(--primary); font-weight: 700; }
+        .day-text { color: var(--muted); font-weight: 600; text-transform: capitalize; }
+
+        @media (max-width: 700px) {
+            .container { padding: 22px 16px; }
+            .btn { width: 100%; justify-content: center; }
+            .actions, .search-box { flex-direction: column; }
+            .header { align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+<div id="monthlyReportProgress" class="progress-bar"><span></span></div>
+
+<div class="container">
+    <div class="header">
+        <h2 id="monthTitle">Monthly Attendance Report</h2>
+        <div class="actions">
+            <a href="admin.html" class="btn gray">⬅ Dashboard</a>
+            <button onclick="downloadCSV()" class="btn green">📑 CSV</button>
+            <button onclick="downloadPDF()" class="btn red">📄 Export PDF</button>
+        </div>
+    </div>
+
+    <div class="search-box">
+        <input type="month" id="monthSelect">
+        <input type="text" id="teacherSearch" placeholder="Search teacher name...">
+        <button onclick="loadReport()" class="btn">🔍 Generate Report</button>
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Teacher</th>
+                    <th>Weekday</th>
+                    <th>Date</th>
+                    <th>Check In</th>
+                    <th>Check Out</th>
+                </tr>
+            </thead>
+            <tbody id="reportTable">
+                <tr><td colspan="5" style="padding: 40px; color: #94a3b8;">Loading report data...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="footer">
+        <span id="totalCount">Total Records: 0</span>
+        <span style="font-size: 12px; color: #94a3b8;">Generated on <span id="genDate"></span></span>
+    </div>
+</div>
+
+<script>
+    // Set default month to current
+    document.getElementById('monthSelect').value = new Date().toISOString().slice(0, 7);
+    document.getElementById('genDate').innerText = new Date().toLocaleDateString();
+
+    async function loadReport() {
+        const month = document.getElementById('monthSelect').value;
+        const teacher = document.getElementById('teacherSearch').value.trim();
+        const tbody = document.getElementById('reportTable');
+        
+        tbody.innerHTML = '<tr><td colspan="5" style="padding: 40px;">⏳ Processing request...</td></tr>';
+
+        try {
+            showMonthlyReportProgress();
+            updateMonthlyReportProgress(30);
+            const response = await fetch(`/monthly-report?month=${month}&teacher=${encodeURIComponent(teacher)}`);
+            
+            if (response.status === 401) return window.location = 'login.html';
+            
+            updateMonthlyReportProgress(75);
+            const result = await response.json();
+            
+            // Format Display Title
+            const dateParts = month.split("-");
+            const dateObj = new Date(dateParts[0], dateParts[1] - 1);
+            const monthName = dateObj.toLocaleString('default', { month: 'long', year: 'numeric' });
+            
+            document.getElementById('monthTitle').innerText = `Report: ${monthName}`;
+            document.getElementById('totalCount').innerText = `Total Records: ${result.total || 0}`;
+
+            if (!result.data || result.data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="padding: 40px; color: #64748b;">No records found for this period.</td></tr>';
+                return;
+            }
+
+            tbody.replaceChildren();
+            result.data.forEach(row => {
+                const tableRow = document.createElement('tr');
+                const nameCell = document.createElement('td');
+                const name = document.createElement('strong');
+                name.textContent = row.name || '';
+                nameCell.append(name);
+
+                const dayCell = document.createElement('td');
+                const day = document.createElement('span');
+                day.className = 'day-text';
+                day.textContent = row.day_name || '---';
+                dayCell.append(day);
+
+                const dateCell = document.createElement('td');
+                dateCell.textContent = row.attendance_date || '';
+
+                const checkInCell = document.createElement('td');
+                if (row.check_in) {
+                    const checkIn = document.createElement('span');
+                    checkIn.className = 'time-in';
+                    checkIn.textContent = row.check_in;
+                    checkInCell.append(checkIn);
+                } else {
+                    checkInCell.textContent = '-';
+                }
+
+                const checkOutCell = document.createElement('td');
+                const checkOut = document.createElement('span');
+                checkOut.className = row.check_out ? 'time-out' : 'status-onsite';
+                checkOut.textContent = row.check_out || 'STILL ONSITE';
+                checkOutCell.append(checkOut);
+
+                tableRow.append(nameCell, dayCell, dateCell, checkInCell, checkOutCell);
+                tbody.append(tableRow);
+            });
+        } catch (err) {
+            console.error("Load Error:", err);
+            tbody.innerHTML = '<tr><td colspan="5" style="color:var(--danger); padding: 40px;">⚠️ Connection failed. Please check server status.</td></tr>';
+        } finally {
+            hideMonthlyReportProgress();
+        }
+    }
+
+    function downloadPDF() {
+        const month = document.getElementById('monthSelect').value;
+        const teacher = document.getElementById('teacherSearch').value.trim();
+        // Triggers the isDownload logic in monthlyReport.js
+        window.location.href = `/monthly-report?download=true&month=${month}&teacher=${encodeURIComponent(teacher)}`;
+    }
+
+    function downloadCSV() {
+        const month = document.getElementById('monthSelect').value;
+        const teacher = document.getElementById('teacherSearch').value.trim();
+        window.location.href = `/monthly-report?format=csv&month=${month}&teacher=${encodeURIComponent(teacher)}`;
+    }
+
+    function showMonthlyReportProgress() {
+        const bar = document.getElementById('monthlyReportProgress');
+        bar.style.display = 'block';
+        bar.firstElementChild.style.width = '20%';
+    }
+    function updateMonthlyReportProgress(value) {
+        document.getElementById('monthlyReportProgress').firstElementChild.style.width = `${value}%`;
+    }
+    function hideMonthlyReportProgress() {
+        const bar = document.getElementById('monthlyReportProgress');
+        bar.firstElementChild.style.width = '100%';
+        setTimeout(() => {
+            bar.style.display = 'none';
+            bar.firstElementChild.style.width = '0';
+        }, 200);
+    }
+
+    document.addEventListener('DOMContentLoaded', loadReport);
+</script>
+<script src="assets/theme.js"></script>
+</body>
+</html>

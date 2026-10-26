@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Report</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/theme.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-strong: #1d4ed8;
+            --text: #0f172a;
+            --muted: #475569;
+            --bg: #f3f7ff;
+            --panel: rgba(255,255,255,0.9);
+            --panel-soft: #f8fbff;
+            --line: rgba(148,163,184,0.22);
+            --success: #16a34a;
+            --warning: #f59e0b;
+            --shadow: 0 20px 45px rgba(15,23,42,0.08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            padding: 38px 18px;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(37,99,235,0.12), transparent 28%),
+                radial-gradient(circle at bottom right, rgba(14,165,233,0.12), transparent 30%),
+                linear-gradient(135deg, #f4f8ff 0%, var(--bg) 100%);
+        }
+
+        .container {
+            max-width: 1180px;
+            margin: 0 auto;
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            padding: 28px;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+        }
+
+        .header h2 {
+            font-size: clamp(2rem, 3vw, 2.5rem);
+            font-weight: 800;
+            letter-spacing: -0.06em;
+            color: var(--text);
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: none;
+            border-radius: 12px;
+            padding: 11px 18px;
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            filter: brightness(0.98);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-strong) 100%);
+            color: #fff;
+            box-shadow: 0 14px 22px rgba(37,99,235,0.18);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+            color: #b91c1c;
+            border: 1px solid rgba(239,68,68,0.18);
+        }
+
+        .search-box form {
+            display: flex;
+            gap: 10px;
+            max-width: 480px;
+            margin-bottom: 24px;
+        }
+
+        .search-box input {
+            flex: 1;
+            min-height: 52px;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 0 16px;
+            background: var(--panel-soft);
+            color: var(--text);
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .search-box input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(37,99,235,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            overflow: hidden;
+            background: rgba(255,255,255,0.75);
+            box-shadow: 0 8px 22px rgba(15,23,42,0.03);
+        }
+
+        thead th {
+            background: linear-gradient(180deg, #f8fbff 0%, #eef4ff 100%);
+            color: var(--muted);
+            font-size: 11px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-weight: 700;
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--line);
+        }
+
+        tbody td {
+            padding: 15px 16px;
+            border-bottom: 1px solid var(--line);
+            font-size: 14px;
+            color: var(--text);
+        }
+
+        tbody tr:hover {
+            background: rgba(37,99,235,0.025);
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .time-in {
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .time-out {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .onsite-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5px 10px;
+            border-radius: 999px;
+            background: rgba(245,158,11,0.12);
+            color: #92400e;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            animation: pulse 2s infinite;
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(37,99,235,0.12);
+            z-index: 1001;
+            display: none;
+        }
+
+        .progress-bar span {
+            display: block;
+            width: 0;
+            height: 100%;
+            background: linear-gradient(90deg, #2563eb, #1d4ed8);
+            transition: width 0.25s ease;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        @media (max-width: 700px) {
+            .container {
+                padding: 20px 16px;
+            }
+
+            .search-box form {
+                flex-direction: column;
+                max-width: 100%;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            th, td {
+                padding: 12px 10px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div id="reportProgress" class="progress-bar"><span></span></div>
+
+<div class="container">
+  <div class="header">
+    <h2>📊 Attendance Terminal</h2>
+    <div class="actions">
+      <button onclick="exportPDF()" class="btn btn-danger">📄 Export PDF</button>
+      <a href="admin.html" class="btn btn-primary">🏠 Dashboard</a>
+    </div>
+  </div>
+
+  <div class="search-box">
+    <form onsubmit="searchTeacher(event)" role="search" aria-label="Search attendance by teacher">
+      <input type="text" id="teacherInput" placeholder="Search teacher name...">
+      <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Full Name</th>
+        <th>Weekday</th>
+        <th>Date</th>
+        <th>Arrival (Check In)</th>
+        <th>Departure (Check Out)</th>
+      </tr>
+    </thead>
+    <tbody id="tbody">
+      <tr><td colspan="5" style="text-align:center; padding:20px;">Initializing system logs...</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+// Load table data
+async function loadData(teacher = '') {
+  const tbody = document.getElementById('tbody');
+  
+  try {
+    showReportProgress();
+    updateReportProgress(25);
+    const res = await fetch(`/export-pdf?teacher=${encodeURIComponent(teacher)}`);
+    
+    if (res.status === 401) return window.location = 'login.html';
+    
+    updateReportProgress(65);
+    const records = await res.json();
+    tbody.replaceChildren();
+
+    if (!records || records.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:40px; color:#64748b;">No records found.</td></tr>`;
+      return;
+    }
+
+    records.forEach(r => {
+      const row = document.createElement('tr');
+      const nameCell = document.createElement('td');
+      const name = document.createElement('strong');
+      name.textContent = r.name || '';
+      nameCell.append(name);
+      const dayCell = document.createElement('td');
+      dayCell.textContent = r.day_name || '';
+      const dateCell = document.createElement('td');
+      dateCell.textContent = r.attendance_date || '';
+
+      const checkInCell = document.createElement('td');
+      const checkIn = document.createElement('span');
+      checkIn.className = r.check_in ? 'time-in' : '';
+      checkIn.textContent = r.check_in || '---';
+      checkInCell.append(checkIn);
+
+      const checkOutCell = document.createElement('td');
+      const checkOut = document.createElement('span');
+      checkOut.className = r.check_out ? 'time-out' : 'onsite-badge';
+      checkOut.textContent = r.check_out || 'STILL ONSITE';
+      checkOutCell.append(checkOut);
+
+      row.append(nameCell, dayCell, dateCell, checkInCell, checkOutCell);
+      tbody.append(row);
+    });
+
+  } catch (err) {
+    console.error(err);
+    tbody.innerHTML = `<tr><td colspan="5" style="color:#ef4444; text-align:center;">⚠️ Failed to synchronize with server.</td></tr>`;
+  } finally {
+    hideReportProgress();
+  }
+}
+
+function showReportProgress() {
+    reportProgress.style.display = 'block';
+    reportProgress.firstElementChild.style.width = '20%';
+}
+
+function updateReportProgress(value) {
+    reportProgress.firstElementChild.style.width = `${value}%`;
+}
+
+function hideReportProgress() {
+    reportProgress.firstElementChild.style.width = '100%';
+    setTimeout(() => {
+        reportProgress.style.display = 'none';
+        reportProgress.firstElementChild.style.width = '0';
+    }, 200);
+}
+
+function exportPDF() {
+    const teacher = document.getElementById('teacherInput').value.trim();
+    const url = `/export-pdf?download=true&teacher=${encodeURIComponent(teacher)}`;
+    window.open(url, '_blank');
+}
+
+function searchTeacher(e) {
+  e.preventDefault();
+  loadData(document.getElementById('teacherInput').value.trim());
+}
+
+const initialTeacher = new URLSearchParams(window.location.search).get('teacher')?.trim() || '';
+document.getElementById('teacherInput').value = initialTeacher;
+document.addEventListener('DOMContentLoaded', () => loadData(initialTeacher));
+</script>
+<script src="assets/theme.js"></script>
+</body>
+</html>

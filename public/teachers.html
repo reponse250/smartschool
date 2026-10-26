@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SmartSchool | Teacher Management</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/theme.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+    --danger: #ef4444;
+    --danger-hover: #dc2626;
+    --text: #111827;
+    --text-light: #6b7280;
+    --bg: #f9fafb;
+    --card: #ffffff;
+    --card-soft: #f3f4f6;
+    --border: #e5e7eb;
+    --shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+
+/* Reset */
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
+body { background-color: var(--bg); color: var(--text); line-height:1.6; padding:40px 20px; }
+
+/* Container */
+.container { max-width: 1000px; margin:0 auto; }
+
+/* Header */
+.header { display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; }
+.header-title h2 { font-size:28px; color: var(--text); letter-spacing:-0.5px; }
+.header-title p { color: var(--text-light); font-size:14px; }
+
+.back-btn {
+    display:flex; align-items:center; gap:8px;
+    padding:10px 18px; background: var(--card); color: var(--text);
+    text-decoration:none; border-radius:10px; font-weight:600; font-size:14px;
+    border:1px solid var(--border); transition: all 0.2s;
+}
+.back-btn:hover { background: var(--primary); color:#fff; border-color: var(--primary); }
+
+/* Action Bar */
+.action-bar {
+    background: var(--card);
+    padding:24px;
+    border-radius:16px;
+    box-shadow: var(--shadow);
+    border:1px solid var(--border);
+    display:flex; flex-direction:column; gap:15px;
+    margin-bottom:24px;
+}
+.row-inputs { display:flex; gap:15px; flex-wrap:wrap; }
+
+.input-group { position: relative; flex:1; }
+.input-group i {
+    position:absolute; left:14px; top:50%; transform:translateY(-50%);
+    color: var(--text-light);
+}
+
+input {
+    width:100%; padding:12px 12px 12px 40px;
+    border-radius:10px; border:1.5px solid var(--border);
+    font-size:15px; background: var(--card-soft); color: var(--text);
+    transition: all 0.2s;
+}
+input:focus { outline:none; border-color: var(--primary); box-shadow:0 0 0 3px rgba(37,99,235,0.2); }
+
+/* Add Button */
+.add-btn {
+    padding:12px 24px; background: var(--primary); color:#fff;
+    border:none; border-radius:10px; font-weight:600;
+    cursor:pointer; display:flex; align-items:center; gap:8px;
+    transition: background 0.2s;
+}
+.add-btn:hover { background: var(--primary-hover); }
+
+/* Table */
+.table-container {
+    background: var(--card);
+    border-radius:16px;
+    box-shadow: var(--shadow);
+    border:1px solid var(--border);
+    overflow:hidden;
+}
+
+table { width:100%; border-collapse:collapse; text-align:left; }
+th {
+    background: var(--card-soft); padding:16px 24px; font-size:13px;
+    font-weight:600; text-transform:uppercase; color: var(--text-light);
+    border-bottom:1px solid var(--border);
+}
+td {
+    padding:16px 24px; border-bottom:1px solid var(--border); vertical-align: middle;
+}
+tr:hover { background-color: #f3f4f6; transition:0.2s; }
+
+.teacher-info { display:flex; align-items:center; gap:12px; }
+.avatar {
+    width:40px; height:40px; background: var(--primary);
+    color: #fff; border-radius:10px; display:flex;
+    align-items:center; justify-content:center; font-weight:700;
+    font-size:14px; border:1px solid var(--primary-hover);
+}
+.status-badge {
+    padding:4px 10px; border-radius:20px; font-size:12px;
+    font-weight:600; background:#16a34a; color:#d1fae5;
+}
+
+.delete-btn {
+    background: var(--danger); color:#fff;
+    border:1px solid var(--danger); padding:8px 14px;
+    border-radius:8px; cursor:pointer; font-size:13px; font-weight:600;
+    transition: all 0.2s;
+}
+.delete-btn:hover { background: var(--danger-hover); border-color: var(--danger-hover); }
+
+/* Loading */
+.loading { text-align:center; padding:60px; color: var(--text-light); }
+
+.progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: rgba(37,99,235,0.14);
+    z-index: 1001;
+    display: none;
+}
+.progress-bar span {
+    display: block;
+    width: 0;
+    height: 100%;
+    background: linear-gradient(90deg, #2563eb, #4f46e5);
+    transition: width 0.25s ease;
+}
+
+/* Responsive */
+@media(max-width:768px){
+    .row-inputs { flex-direction:column; }
+    .table-container { font-size:13px; }
+}
+
+    :root {
+        --primary: #2563eb;
+        --primary-hover: #1d4ed8;
+        --danger: #ef4444;
+        --danger-hover: #dc2626;
+        --bg: #eef4ff;
+        --card: rgba(255,255,255,0.9);
+        --card-soft: #f8fbff;
+        --text: #0f172a;
+        --text-light: #475569;
+        --border: rgba(148,163,184,0.25);
+        --shadow: 0 20px 45px rgba(15,23,42,0.08);
+    }
+
+    body {
+        background:
+            radial-gradient(circle at top left, rgba(37,99,235,0.12), transparent 30%),
+            radial-gradient(circle at bottom right, rgba(14,165,233,0.10), transparent 26%),
+            linear-gradient(135deg, #f4f8ff 0%, var(--bg) 100%);
+        padding: 42px 18px;
+        color: var(--text);
+    }
+
+    .container {
+        max-width: 1080px;
+        background: rgba(255,255,255,0.86);
+        border: 1px solid var(--border);
+        border-radius: 28px;
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(10px);
+    }
+
+    .header {
+        margin-bottom: 28px;
+        padding-bottom: 8px;
+    }
+
+    .header-title h2 {
+        font-size: clamp(2rem, 3vw, 2.6rem);
+        letter-spacing: -0.06em;
+    }
+
+    .header-title p {
+        color: var(--text-light);
+        margin-top: 8px;
+    }
+
+    .back-btn {
+        background: rgba(255,255,255,0.9);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(15,23,42,0.05);
+    }
+
+    .action-bar {
+        background: rgba(255,255,255,0.82);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        box-shadow: var(--shadow);
+        padding: 22px;
+    }
+
+    .input-group { position: relative; }
+    .input-group i {
+        left: 15px;
+        color: var(--text-light);
+    }
+
+    input {
+        background: var(--card-soft);
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        min-height: 52px;
+        padding-left: 42px;
+    }
+
+    input:focus {
+        box-shadow: 0 0 0 4px rgba(37,99,235,0.12);
+        border-color: var(--primary);
+    }
+
+    .add-btn {
+        min-height: 52px;
+        border-radius: 12px;
+        box-shadow: 0 12px 22px rgba(37,99,235,0.18);
+    }
+
+    .table-container {
+        background: rgba(255,255,255,0.9);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+    }
+
+    th {
+        background: linear-gradient(180deg, #f8fbff 0%, #eef4ff 100%);
+        color: var(--text-light);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    td {
+        background: rgba(255,255,255,0.35);
+    }
+
+    tr:hover {
+        background: rgba(37,99,235,0.03);
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 88px;
+        border-radius: 999px;
+        padding: 6px 10px;
+        background: rgba(22,163,74,0.12);
+        color: #166534;
+        font-size: 11px;
+    }
+
+    .delete-btn {
+        border-radius: 10px;
+        box-shadow: 0 10px 20px rgba(239,68,68,0.16);
+    }
+
+    .loading {
+        background: rgba(248,250,252,0.8);
+    }
+
+    @media (max-width: 768px) {
+        body {
+            padding: 24px 12px;
+        }
+
+        .header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .row-inputs {
+            flex-direction: column;
+        }
+    }
+</style>
+</head>
+
+<body>
+<div id="teacherProgress" class="progress-bar"><span></span></div>
+<div class="container">
+    <div class="header">
+        <div class="header-title">
+            <h2>Staff Directory</h2>
+            <p>Manage faculty members and their access records</p>
+        </div>
+        <a href="admin.html" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Dashboard
+        </a>
+    </div>
+
+    <div class="action-bar">
+        <form onsubmit="addTeacher(event)" class="row-inputs">
+            <div class="input-group">
+                <i class="fas fa-user-plus"></i>
+                <input type="text" id="teacherName" placeholder="Enter teacher's full name..." required>
+            </div>
+            <button type="submit" class="add-btn" id="addTeacherBtn">
+                <i class="fas fa-plus"></i> Add Teacher
+            </button>
+        </form>
+        <div class="input-group">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" onkeyup="filterTeachers()" placeholder="Search by name or ID...">
+        </div>
+    </div>
+    <div id="teacherStatus" style="margin-bottom:18px; font-size:14px; display:none; color:#1f2937;"></div>
+
+    <div class="table-container">
+        <table id="teacherTable">
+            <thead>
+                <tr>
+                    <th>Teacher Name</th>
+                    <th>Status</th>
+                    <th style="text-align:right;">Operations</th>
+                </tr>
+            </thead>
+            <tbody id="tbody">
+                <tr><td colspan="3" class="loading"><i class="fas fa-circle-notch fa-spin"></i> Loading faculty data...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+const API = '/teachers';
+let allTeachers = [];
+const teacherProgress = document.getElementById('teacherProgress');
+const teacherStatus = document.getElementById('teacherStatus');
+const addTeacherBtn = document.getElementById('addTeacherBtn');
+
+function getInitials(name){ if(!name)return "?"; return name.trim().split(' ').map(n=>n[0]).join('').toUpperCase().substring(0,2); }
+
+function showTeacherProgress() {
+    teacherProgress.style.display = 'block';
+    teacherProgress.firstElementChild.style.width = '20%';
+}
+
+function updateTeacherProgress(value) {
+    teacherProgress.firstElementChild.style.width = `${value}%`;
+}
+
+function hideTeacherProgress() {
+    teacherProgress.firstElementChild.style.width = '100%';
+    setTimeout(() => {
+        teacherProgress.style.display = 'none';
+        teacherProgress.firstElementChild.style.width = '0';
+    }, 200);
+}
+
+function showTeacherStatus(message, color = '#1f2937') {
+    teacherStatus.style.display = 'block';
+    teacherStatus.textContent = message;
+    teacherStatus.style.color = color;
+}
+
+function hideTeacherStatus() {
+    teacherStatus.style.display = 'none';
+}
+
+async function loadTeachers(){
+    showTeacherProgress();
+    updateTeacherProgress(15);
+    try{
+        const res=await fetch(API,{credentials:'include'});
+        if(res.status===401){ window.location='login.html'; return; }
+        if(!res.ok) throw new Error('Failed to load');
+        allTeachers=await res.json();
+        renderTable(allTeachers);
+        hideTeacherStatus();
+    }catch(err){
+        document.getElementById('tbody').innerHTML=`<tr><td colspan="3" class="loading" style="color:#ef4444">Failed to connect to server</td></tr>`;
+        showTeacherStatus('Unable to load teacher list. Please refresh.', '#dc2626');
+        console.error(err);
+    } finally {
+        hideTeacherProgress();
+    }
+}
+
+function renderTable(data) {
+    const tbody = document.getElementById('tbody');
+    tbody.replaceChildren();
+    if (!data.length) {
+        const row = document.createElement('tr');
+        const cell = document.createElement('td');
+        cell.colSpan = 3;
+        cell.className = 'loading';
+        cell.textContent = 'No teachers found.';
+        row.append(cell);
+        tbody.append(row);
+        return;
+    }
+
+    data.forEach(teacher => {
+        const name = String(teacher.name || '');
+        const row = document.createElement('tr');
+        const identityCell = document.createElement('td');
+        const info = document.createElement('div');
+        info.className = 'teacher-info';
+        const avatar = document.createElement('div');
+        avatar.className = 'avatar';
+        avatar.textContent = getInitials(name);
+        const details = document.createElement('div');
+        const teacherName = document.createElement('div');
+        teacherName.style.fontWeight = '600';
+        teacherName.textContent = name;
+        const staffId = document.createElement('div');
+        staffId.style.cssText = 'font-size:12px;color:var(--text-light)';
+        staffId.textContent = `Staff ID: #TCH-${teacher.id}`;
+        details.append(teacherName, staffId);
+        info.append(avatar, details);
+        identityCell.append(info);
+
+        const statusCell = document.createElement('td');
+        const status = document.createElement('span');
+        status.className = 'status-badge';
+        status.textContent = 'Active';
+        statusCell.append(status);
+
+        const actionCell = document.createElement('td');
+        actionCell.style.textAlign = 'right';
+        const deleteButton = document.createElement('button');
+        deleteButton.type = 'button';
+        deleteButton.className = 'delete-btn';
+        deleteButton.innerHTML = '<i class="fas fa-trash"></i> Delete';
+        deleteButton.addEventListener('click', () => deleteTeacher(teacher.id, name));
+        actionCell.append(deleteButton);
+
+        row.append(identityCell, statusCell, actionCell);
+        tbody.append(row);
+    });
+}
+
+function filterTeachers(){ const q=document.getElementById('searchInput').value.toLowerCase(); renderTable(allTeachers.filter(t=>String(t.name || '').toLowerCase().includes(q)||String(t.id).includes(q)));}
+
+async function addTeacher(e){
+    e.preventDefault();
+    const input=document.getElementById('teacherName');
+    const name=input.value.trim();
+    if(!name) return;
+    addTeacherBtn.disabled = true;
+    addTeacherBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Adding...';
+    showTeacherProgress();
+    updateTeacherProgress(35);
+    try{
+        const res=await fetch(API,{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({name})});
+        const result=await res.json();
+        if(res.status===401){ window.location='login.html'; return; }
+        if(res.status===403){ showTeacherStatus('Only admins can add teachers.', '#b91c1c'); return; }
+        if(result.status==='success'){
+            input.value='';
+            showTeacherStatus('Teacher added successfully.', '#047857');
+            await loadTeachers();
+        } else {
+            showTeacherStatus(result.message||'Failed to add teacher.', '#b91c1c');
+        }
+    }catch(err){
+        showTeacherStatus('Server not reachable.', '#b91c1c');
+        console.error(err);
+    } finally {
+        addTeacherBtn.disabled = false;
+        addTeacherBtn.innerHTML = '<i class="fas fa-plus"></i> Add Teacher';
+        hideTeacherProgress();
+    }
+}
+
+async function deleteTeacher(id,name){ if(!confirm(`⚠️ PERMANENT ACTION\n\nDelete "${name}" and all their logs?`)) return; showTeacherProgress(); updateTeacherProgress(30); try{ const res=await fetch(`${API}/${id}`,{method:'DELETE',credentials:'include'}); const result=await res.json(); if(res.status===401){ window.location='login.html'; return;} if(res.status===403){ showTeacherStatus('Only admins can delete teachers.', '#b91c1c'); return;} if(res.ok&&result.status==='success'){ await loadTeachers(); }else{ showTeacherStatus(`Error: ${result.message||'Could not delete.'}`, '#b91c1c'); }}catch(err){ console.error(err); showTeacherStatus('Server not reachable.', '#b91c1c'); } finally { hideTeacherProgress(); }}
+document.addEventListener('DOMContentLoaded',loadTeachers);
+</script>
+<script src="assets/theme.js"></script>
+</body>
+</html>

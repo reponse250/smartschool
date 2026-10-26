@@ -1,0 +1,2069 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SmartSchool | Admin Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/theme.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --primary: #2563eb;
+    --primary-strong: #1d4ed8;
+    --primary-soft: rgba(37, 99, 235, 0.12);
+    --bg: #edf4ff;
+    --bg-strong: #eaf1ff;
+    --surface: rgba(255, 255, 255, 0.9);
+    --surface-strong: #ffffff;
+    --surface-soft: #f8fbff;
+    --text: #0f172a;
+    --text-muted: #475569;
+    --line: rgba(148, 163, 184, 0.24);
+    --success: #16a34a;
+    --danger: #ef4444;
+    --shadow: 0 22px 50px rgba(15, 23, 42, 0.12);
+}
+
+:root[data-theme='dark'] {
+    --bg: #0f172a;
+    --bg-strong: #111827;
+    --surface: rgba(15, 23, 42, 0.9);
+    --surface-strong: #111827;
+    --surface-soft: #0b1220;
+    --text: #e2e8f0;
+    --text-muted: #94a3b8;
+    --line: rgba(148, 163, 184, 0.18);
+    --shadow: 0 22px 50px rgba(2, 6, 23, 0.4);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Plus Jakarta Sans',sans-serif; }
+
+body {
+    display:flex;
+    min-height:100vh;
+    background:
+        radial-gradient(circle at top left, rgba(37,99,235,0.14), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(14,165,233,0.12), transparent 26%),
+        linear-gradient(135deg, var(--bg-strong) 0%, var(--bg) 100%);
+    color: var(--text);
+}
+
+nav {
+    width: 280px;
+    background: rgba(15, 23, 42, 0.97);
+    display:flex;
+    flex-direction:column;
+    position:fixed;
+    height:100vh;
+    border-right:1px solid rgba(148,163,184,0.12);
+    box-shadow: 20px 0 40px rgba(15, 23, 42, 0.12);
+}
+
+.nav-header {
+    display:flex; align-items:center; gap:12px;
+    padding:34px 28px 24px;
+    border-bottom:1px solid rgba(148,163,184,0.10);
+}
+
+.logo-icon {
+    width:42px; height:42px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-strong) 100%);
+    border-radius:14px;
+    display:flex; justify-content:center; align-items:center;
+    color:#fff; font-size:18px;
+    box-shadow: 0 12px 22px rgba(37,99,235,0.25);
+}
+
+.nav-header h1 {
+    font-size:1.5rem; font-weight:800;
+    color:#f8fafc; letter-spacing:-0.05em;
+}
+
+.nav-links {
+    flex-grow:1;
+    padding:12px 10px 18px;
+}
+
+.nav-links a {
+    display:flex; align-items:center; gap:12px;
+    padding:13px 16px;
+    margin:6px 0;
+    font-weight:600; font-size:14px;
+    border-radius:12px;
+    color:#cbd5e1;
+    text-decoration:none;
+    border:1px solid transparent;
+    transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.nav-links a i {
+    color:#93c5fd; font-size:17px;
+    width:20px; text-align:center;
+}
+
+.nav-links a:hover {
+    background: rgba(255,255,255,0.03);
+    border-color: rgba(148,163,184,0.08);
+    transform: translateX(2px);
+    color:#fff;
+}
+
+.nav-links a.active {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-strong) 100%);
+    color:#fff;
+    box-shadow: 0 12px 22px rgba(37,99,235,0.28);
+    border-color: rgba(255,255,255,0.18);
+}
+
+.nav-links a.active i { color:#fff; }
+
+.logout-link {
+    color:#fca5a5 !important;
+    margin-top:10px;
+    border-top:1px solid rgba(148,163,184,0.10);
+    padding-top:18px !important;
+}
+
+main {
+    margin-left:280px;
+    width:calc(100% - 280px);
+    padding:42px 48px 56px;
+}
+
+.top-bar {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:18px;
+    margin-bottom:32px;
+    flex-wrap:wrap;
+}
+
+.welcome-text h2 {
+    font-size: clamp(2.1rem, 2.7vw, 3rem);
+    font-weight:800;
+    letter-spacing:-0.06em;
+    color: var(--text);
+}
+
+.welcome-text p {
+    color: var(--text-muted);
+    font-size: 0.96rem;
+    margin-top:8px;
+}
+
+.top-bar-right {
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-left:auto;
+}
+
+.admin-profile {
+    display:flex; align-items:center; gap:14px;
+    background: var(--surface);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:10px 16px;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(10px);
+}
+
+.admin-profile img {
+    width:46px; border-radius:12px;
+    box-shadow: 0 8px 15px rgba(37,99,235,0.18);
+}
+
+.admin-profile p {
+    margin:0;
+    line-height:1.5;
+}
+
+.admin-profile .profile-name {
+    font-weight:700;
+    color: var(--text);
+}
+
+.admin-profile .profile-status {
+    font-size:11px;
+    color: var(--success);
+    font-weight:700;
+}
+
+.search-container {
+    background: var(--surface);
+    border:1px solid var(--line);
+    border-radius:22px;
+    box-shadow: var(--shadow);
+    padding:18px;
+    margin-bottom:30px;
+    backdrop-filter: blur(10px);
+}
+
+.search-box {
+    display:flex; gap:12px;
+    width:100%;
+}
+
+.search-box input {
+    flex:1; min-width:0;
+    padding:15px 18px;
+    border-radius:14px;
+    border:1px solid var(--line);
+    background: var(--surface-soft);
+    color: var(--text);
+    font-size:14px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-box input::placeholder { color:#94a3b8; }
+.search-box input:focus {
+    outline:none;
+    border-color:var(--primary);
+    box-shadow: 0 0 0 4px var(--primary-soft);
+}
+
+.search-box button {
+    padding:0 26px;
+    border:none; border-radius:14px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-strong) 100%);
+    color:#fff; font-weight:700;
+    cursor:pointer;
+    box-shadow: 0 12px 22px rgba(37,99,235,0.18);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.search-box button:hover {
+    transform: translateY(-1px);
+    opacity: 0.98;
+}
+
+.grid {
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap:24px;
+}
+
+.dashboard-card {
+    display:flex; align-items:center; justify-content:center;
+    background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(248,250,252,0.96));
+    border:1px solid var(--line);
+    border-radius:18px;
+    text-decoration:none;
+    box-shadow: 0 14px 26px rgba(15,23,42,0.06);
+    padding:26px 18px;
+    min-height:110px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transform: translateY(-8px);
+    box-shadow: 0 26px 48px rgba(37,99,235,0.14);
+}
+
+.card-content {
+    display:flex; flex-direction:column; gap:16px;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+}
+
+.icon-box {
+    width:58px; height:58px;
+    border-radius:16px;
+    background: linear-gradient(135deg, rgba(37,99,235,0.12), rgba(14,165,233,0.12));
+    border:1px solid rgba(37,99,235,0.08);
+    color:var(--primary);
+    font-size:24px;
+    display:flex; align-items:center; justify-content:center;
+    transition: all 0.25s ease;
+}
+
+.dashboard-card:hover .icon-box {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-strong) 100%);
+    color:#fff;
+    transform: scale(1.08) rotate(8deg);
+}
+
+.dashboard-card span {
+    font-size:1rem; font-weight:700;
+    color: var(--text);
+}
+
+.admin-card {
+    background: var(--surface);
+    border:1px solid var(--line);
+    border-radius:24px;
+    box-shadow: var(--shadow);
+    padding:26px 24px;
+    margin-top:30px;
+    backdrop-filter: blur(10px);
+}
+
+.card-header {
+    display:flex; justify-content:space-between; align-items:center;
+    gap:12px; margin-bottom:18px;
+    flex-wrap:wrap;
+}
+
+.card-header h3 {
+    font-size:1.1rem; font-weight:800; letter-spacing:-0.03em;
+}
+
+.card-header p {
+    margin-top:4px;
+    font-size:0.9rem;
+    color: var(--text-muted);
+}
+
+.theme-toggle,
+.summary-refresh {
+    border:none; cursor:pointer;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-strong) 100%);
+    color:#fff; font-weight:700;
+    border-radius:12px;
+    box-shadow: 0 12px 22px rgba(37,99,235,0.18);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.theme-toggle {
+    padding: 11px 16px;
+}
+
+.summary-refresh {
+    width:42px; height:42px; display:inline-grid; place-items:center;
+}
+
+.theme-toggle:hover,
+.summary-refresh:hover {
+    transform: translateY(-1px);
+}
+
+.attendance-metrics {
+    display:grid; grid-template-columns: repeat(3,minmax(0,1fr));
+    margin-bottom:22px;
+    border:1px solid var(--line);
+    border-radius:18px;
+    background: var(--surface-soft);
+    overflow:hidden;
+}
+
+.attendance-metric dt {
+    color: var(--text-muted);
+    font-size:12px; text-transform:uppercase; letter-spacing:0.08em;
+    font-weight:700;
+}
+
+.attendance-metric dd {
+    color: var(--text);
+    font-size:2rem; font-weight:800; letter-spacing:-0.06em;
+    margin-top:8px;
+    line-height:1.1;
+}
+
+.attendance-metric.present dd { color: var(--success); }
+.attendance-metric.absent dd { color: var(--danger); }
+.attendance-metric.total dd { color: var(--text); }
+
+.recent-checkins {
+    list-style:none;
+}
+
+.recent-checkins li {
+    display:flex; justify-content:space-between; align-items:center;
+    gap:12px; padding:12px 0; border-bottom:1px solid var(--line);
+}
+
+.recent-checkins li:last-child { border-bottom:none; }
+
+.recent-checkins strong { font-size:14px; }
+.recent-checkins time,
+.recent-checkins .empty-state {
+    color: var(--text-muted); font-size:13px;
+}
+
+.message-list {
+    display:grid; gap:14px;
+}
+
+.message-item {
+    background: var(--surface-soft);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:18px;
+}
+
+.message-item strong {
+    display:block; margin-bottom:4px;
+}
+
+.message-item small {
+    color: var(--text-muted);
+}
+
+.message-item p {
+    margin:10px 0 0;
+    line-height:1.6;
+}
+
+.message-item .status-chip {
+    display:inline-flex; align-items:center; gap:8px;
+    padding:6px 10px; border-radius:999px;
+    background: rgba(96,165,250,0.12);
+    color: #2563eb;
+    font-size:12px; font-weight:700;
+    margin-top:12px;
+}
+
+.footer {
+    margin-top:36px;
+    padding-top:18px;
+    color: var(--text-muted);
+    font-size:13px;
+    border-top:1px solid var(--line);
+}
+
+.progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    width:100%; height:4px;
+    background: rgba(37,99,235,0.12);
+    z-index: 1001;
+    display:none;
+}
+
+.progress-bar span {
+    display:block; width:0; height:100%;
+    background: linear-gradient(90deg, #2563eb, #1e40af);
+    transition: width 0.25s ease;
+}
+
+#adminNotificationDropdown {
+    background: var(--surface);
+    border:1px solid var(--line);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(10px);
+}
+
+.notification-item {
+    padding:12px 10px;
+    border-bottom:1px solid var(--line);
+}
+
+.notification-item:last-child {
+    border-bottom:none;
+}
+
+.notification-item strong {
+    display:flex; align-items:center; gap:8px;
+    margin-bottom:5px;
+}
+
+.notification-item .status-dot {
+    width:8px; height:8px; border-radius:50%;
+    background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+    display:inline-block;
+}
+
+.notification-item small {
+    display:block;
+    color: var(--text-muted);
+    line-height:1.6;
+}
+
+.notification-item .message-body {
+    margin-top:8px;
+    color: var(--text);
+    line-height:1.5;
+}
+
+.notification-item .delete-btn {
+    margin-top:10px;
+    border:none; border-radius:10px; padding:7px 10px;
+    background:#fee2e2; color:#991b1b; font-weight:700; cursor:pointer;
+}
+
+.notification-item .delete-btn:hover {
+    filter: brightness(0.98);
+}
+
+:root {
+    --dash-bg:#f2f6ff;
+    --dash-panel:#fff;
+    --dash-panel-soft:#f7f9fe;
+    --dash-ink:#18243b;
+    --dash-muted:#74819b;
+    --dash-line:#e5ebf5;
+    --dash-blue:#1765ef;
+    --dash-navy:#102342;
+    --dash-green:#16b982;
+    --dash-purple:#a445ee;
+    --dash-orange:#ff9d27;
+    --dash-red:#ff5570;
+}
+
+:root[data-theme='dark'] {
+    --dash-bg:#0d1729;
+    --dash-panel:#142137;
+    --dash-panel-soft:#192944;
+    --dash-ink:#edf3ff;
+    --dash-muted:#9aabc5;
+    --dash-line:#263754;
+    --dash-navy:#0a1426;
+}
+
+body {
+    display:block;
+    min-height:100vh;
+    background:var(--dash-bg);
+    color:var(--dash-ink);
+    font-family:'Plus Jakarta Sans',sans-serif;
+}
+
+.app-sidebar {
+    position:fixed;
+    inset:0 auto 0 0;
+    z-index:20;
+    display:flex;
+    flex-direction:column;
+    width:176px;
+    padding:14px 10px 12px;
+    color:#d9e5fa;
+    background:var(--dash-navy);
+    border-right:1px solid rgba(255,255,255,.08);
+}
+
+.sidebar-brand {
+    display:flex;
+    align-items:center;
+    gap:8px;
+    min-height:34px;
+    padding:0 5px 15px;
+    color:#fff;
+    font-size:15px;
+    font-weight:800;
+    border-bottom:1px solid rgba(255,255,255,.1);
+}
+
+.sidebar-brand-mark {
+    display:grid;
+    width:27px;
+    height:27px;
+    place-items:center;
+    color:#fff;
+    background:#1765ef;
+    border-radius:8px;
+}
+
+.sidebar-label {
+    margin:18px 7px 7px;
+    color:#7f91ad;
+    font-size:9px;
+    font-weight:800;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+}
+
+.sidebar-nav {
+    display:grid;
+    gap:3px;
+    position:static;
+    width:100%;
+    height:auto;
+    background:transparent;
+    border:0;
+    box-shadow:none;
+}
+
+.sidebar-nav a,
+.sidebar-nav button {
+    display:flex;
+    align-items:center;
+    gap:9px;
+    width:100%;
+    min-height:31px;
+    padding:7px 8px;
+    color:#b9c8df;
+    font:600 10px 'Plus Jakarta Sans',sans-serif;
+    text-align:left;
+    text-decoration:none;
+    background:transparent;
+    border:0;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+.sidebar-nav a i,
+.sidebar-nav button i {
+    width:13px;
+    color:#b7cae7;
+    font-size:11px;
+    text-align:center;
+}
+
+.sidebar-nav a:hover,
+.sidebar-nav button:hover,
+.sidebar-nav a.active {
+    color:#fff;
+    background:#1765ef;
+}
+
+.sidebar-nav a.active i,
+.sidebar-nav a:hover i,
+.sidebar-nav button:hover i { color:#fff; }
+
+.sidebar-badge {
+    display:none;
+    align-items:center;
+    justify-content:center;
+    min-width:16px;
+    height:16px;
+    margin-left:auto;
+    padding:0 4px;
+    color:#fff;
+    background:#ff4c68;
+    border-radius:99px;
+    font-size:9px;
+}
+
+.sidebar-footer {
+    margin-top:auto;
+    padding:11px 7px 3px;
+    color:#9db0cc;
+    border-top:1px solid rgba(255,255,255,.1);
+    font-size:8px;
+    line-height:1.5;
+}
+
+.sidebar-footer strong { display:block; color:#fff; font-size:9px; }
+
+.dashboard-main {
+    width:auto;
+    min-height:100vh;
+    margin-left:176px;
+    padding:10px 13px 12px;
+}
+
+.dashboard-topbar {
+    display:grid;
+    grid-template-columns:minmax(170px,1fr) minmax(230px,390px) auto auto;
+    align-items:center;
+    gap:12px;
+    min-height:38px;
+    margin-bottom:10px;
+}
+
+.school-name {
+    margin:0;
+    color:var(--dash-ink);
+    font-size:17px;
+    font-weight:800;
+}
+
+.school-date {
+    margin-top:2px;
+    color:var(--dash-muted);
+    font-size:9px;
+}
+
+.top-search {
+    display:flex;
+    align-items:center;
+    gap:9px;
+    min-width:0;
+    height:42px;
+    padding:4px 5px 4px 13px;
+    background:var(--dash-panel);
+    border:1px solid var(--dash-line);
+    border-radius:11px;
+    box-shadow:0 7px 18px rgba(15,23,42,.07);
+    transition:border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+
+.top-search:focus-within {
+    border-color:#60a5fa;
+    box-shadow:0 0 0 3px rgba(59,130,246,.14), 0 9px 22px rgba(15,23,42,.1);
+}
+
+.top-search > i { flex:0 0 auto; color:var(--dash-muted); font-size:13px; }
+.top-search input {
+    width:100%;
+    min-width:0;
+    height:100%;
+    padding:0 2px;
+    color:var(--dash-ink);
+    background:transparent;
+    border:0;
+    outline:0;
+    font:500 12px 'Plus Jakarta Sans',sans-serif;
+}
+.top-search input::placeholder { color:var(--dash-muted); opacity:.82; }
+.top-search button {
+    display:inline-flex;
+    flex:0 0 auto;
+    align-items:center;
+    justify-content:center;
+    gap:7px;
+    min-width:72px;
+    height:32px;
+    padding:0 10px;
+    border:0;
+    border-radius:8px;
+    background:linear-gradient(135deg,#2563eb,#1765ef);
+    color:#fff;
+    font:700 10px 'Plus Jakarta Sans',sans-serif;
+    cursor:pointer;
+    transition:filter .18s ease, transform .18s ease;
+}
+.top-search button:hover { filter:brightness(1.08); transform:translateY(-1px); }
+.top-search button:focus-visible { outline:3px solid rgba(96,165,250,.55); outline-offset:2px; }
+
+:root[data-theme='dark'] .top-search input {
+    background:transparent !important;
+    border-color:transparent !important;
+    color:var(--dash-ink) !important;
+}
+
+.top-icon-button {
+    position:relative;
+    display:grid;
+    width:30px;
+    height:30px;
+    place-items:center;
+    color:var(--dash-muted);
+    background:var(--dash-panel);
+    border:1px solid var(--dash-line);
+    border-radius:7px;
+    cursor:pointer;
+}
+
+.top-icon-button:hover { color:var(--dash-blue); border-color:#b9d1ff; }
+.top-icon-button .sidebar-badge { position:absolute; top:-5px; right:-5px; }
+
+.profile-summary {
+    display:flex;
+    align-items:center;
+    gap:7px;
+    min-width:112px;
+    padding-left:10px;
+    border-left:1px solid var(--dash-line);
+}
+
+.profile-avatar {
+    display:grid;
+    width:27px;
+    height:27px;
+    place-items:center;
+    color:#fff;
+    background:#1765ef;
+    border-radius:50%;
+    font-size:9px;
+    font-weight:800;
+}
+
+.profile-summary strong { display:block; color:var(--dash-ink); font-size:9px; }
+.profile-summary small { display:block; margin-top:2px; color:var(--dash-muted); font-size:8px; }
+
+.dashboard-columns {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 223px;
+    align-items:start;
+    gap:10px;
+}
+
+.dashboard-primary,
+.dashboard-rail { display:grid; align-content:start; gap:9px; min-width:0; }
+.middle-grid > .dashboard-panel { min-height:174px; }
+.recent-grid > .dashboard-panel { min-height:190px; }
+.dashboard-rail > .dashboard-panel:last-child { min-height:190px; }
+
+.welcome-banner {
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    min-height:72px;
+    overflow:hidden;
+    padding:14px 17px;
+    color:#fff;
+    background:linear-gradient(110deg,#1765ef 0%,#2a79f4 70%,#5669e9 100%);
+    border-radius:9px;
+}
+
+.welcome-banner:after {
+    position:absolute;
+    top:-46px;
+    right:20%;
+    width:160px;
+    height:160px;
+    content:'';
+    border:1px solid rgba(255,255,255,.13);
+    border-radius:50%;
+    box-shadow:0 0 0 20px rgba(255,255,255,.04),0 0 0 42px rgba(255,255,255,.035);
+    pointer-events:none;
+}
+
+.welcome-copy { position:relative; z-index:1; }
+.welcome-copy h1 { margin:0; font-size:17px; font-weight:800; }
+.welcome-copy p { margin:5px 0 0; color:#e3edff; font-size:9px; }
+.welcome-graphic { position:relative; z-index:1; padding:0 10px; color:#fff; font-size:29px; opacity:.94; }
+
+.stat-grid {
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:8px;
+}
+
+.stat-card {
+    display:flex;
+    align-items:center;
+    gap:9px;
+    min-height:58px;
+    padding:9px;
+    background:var(--dash-panel);
+    border:1px solid var(--dash-line);
+    border-radius:8px;
+    box-shadow:0 2px 8px rgba(27,48,86,.035);
+}
+
+.stat-icon {
+    display:grid;
+    flex:0 0 30px;
+    width:30px;
+    height:30px;
+    place-items:center;
+    border-radius:8px;
+    font-size:12px;
+}
+
+.stat-icon.blue { color:#1765ef; background:#e8f0ff; }
+.stat-icon.green { color:#0cae7b; background:#e4f9f1; }
+.stat-icon.purple { color:#a445ee; background:#f4e9ff; }
+.stat-icon.orange { color:#f18b16; background:#fff2df; }
+.stat-label { color:var(--dash-muted); font-size:8px; font-weight:700; }
+.stat-value { display:block; margin-top:3px; color:var(--dash-ink); font-size:15px; font-weight:800; line-height:1; }
+.stat-note { display:block; margin-top:3px; color:var(--dash-green); font-size:7px; }
+
+.dashboard-panel {
+    min-width:0;
+    padding:10px;
+    background:var(--dash-panel);
+    border:1px solid var(--dash-line);
+    border-radius:8px;
+    box-shadow:0 2px 8px rgba(27,48,86,.035);
+}
+
+.panel-heading {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    margin-bottom:9px;
+}
+
+.panel-heading h2,
+.panel-heading h3 { margin:0; color:var(--dash-ink); font-size:10px; font-weight:800; }
+.panel-heading p { margin:3px 0 0; color:var(--dash-muted); font-size:7px; }
+.panel-link,.panel-action { color:var(--dash-blue); background:transparent; border:0; font:700 8px 'Plus Jakarta Sans',sans-serif; text-decoration:none; cursor:pointer; }
+.panel-action:disabled { opacity:.55; cursor:wait; }
+
+.middle-grid {
+    display:grid;
+    grid-template-columns:minmax(0,1.45fr) minmax(170px,.85fr);
+    gap:9px;
+}
+
+.attendance-visuals {
+    display:grid;
+    grid-template-columns:122px minmax(0,1fr);
+    align-items:center;
+    gap:10px;
+}
+
+.donut-wrap { display:grid; justify-items:center; gap:6px; }
+.attendance-donut {
+    display:grid;
+    width:82px;
+    height:82px;
+    place-items:center;
+    background:conic-gradient(var(--dash-green) var(--attendance-angle,0deg),#e9eef7 0deg);
+    border-radius:50%;
+}
+
+.donut-hole { display:grid; width:64px; height:64px; place-content:center; text-align:center; background:var(--dash-panel); border-radius:50%; }
+.donut-hole strong { color:var(--dash-ink); font-size:13px; }
+.donut-hole span { color:var(--dash-muted); font-size:7px; }
+.legend-list { display:grid; gap:5px; width:100%; }
+.legend-item { display:flex; align-items:center; gap:5px; color:var(--dash-muted); font-size:7px; }
+.legend-item strong { margin-left:auto; color:var(--dash-ink); font-size:7px; }
+.legend-dot { width:6px; height:6px; border-radius:50%; background:var(--dash-green); }
+.legend-dot.absent { background:var(--dash-red); }
+
+.trend-wrap { min-width:0; padding-left:9px; border-left:1px solid var(--dash-line); }
+.trend-title { display:flex; justify-content:space-between; color:var(--dash-muted); font-size:7px; }
+.trend-chart { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); align-items:end; gap:6px; height:86px; margin-top:9px; padding:0 2px; border-bottom:1px solid var(--dash-line); background:repeating-linear-gradient(to bottom,transparent 0,transparent 20px,var(--dash-line) 21px); }
+.trend-day { display:flex; flex-direction:column; align-items:center; justify-content:end; height:100%; gap:4px; }
+.trend-bar { width:min(14px,80%); min-height:3px; background:linear-gradient(180deg,#3981ff,#1765ef); border-radius:4px 4px 0 0; }
+.trend-day span { position:absolute; transform:translateY(13px); color:var(--dash-muted); font-size:6px; white-space:nowrap; }
+.trend-footnote { margin-top:13px; color:var(--dash-muted); font-size:7px; }
+
+.quick-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; }
+.quick-action { display:flex; align-items:center; gap:6px; min-height:32px; padding:6px; color:var(--dash-ink); background:var(--dash-panel-soft); border:1px solid var(--dash-line); border-radius:6px; font-size:7px; font-weight:700; text-decoration:none; }
+.quick-action:hover { border-color:#a9c7ff; background:#edf4ff; }
+.quick-action i { display:grid; width:19px; height:19px; place-items:center; color:var(--dash-blue); background:#e4eeff; border-radius:5px; font-size:9px; }
+
+.recent-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:9px; }
+.data-table { width:100%; border-collapse:collapse; table-layout:fixed; }
+.data-table th { padding:6px 4px; color:var(--dash-muted); background:var(--dash-panel-soft); font-size:6px; font-weight:800; text-align:left; text-transform:uppercase; }
+.data-table td { overflow:hidden; padding:6px 4px; color:var(--dash-ink); border-bottom:1px solid var(--dash-line); font-size:7px; text-overflow:ellipsis; white-space:nowrap; }
+.data-table tr:last-child td { border-bottom:0; }
+.person-cell { display:flex; align-items:center; gap:5px; min-width:0; font-weight:700; }
+.person-avatar { display:grid; flex:0 0 17px; width:17px; height:17px; place-items:center; color:#1765ef; background:#e8f0ff; border-radius:50%; font-size:6px; font-weight:800; }
+.status-pill { display:inline-block; padding:3px 5px; color:#07875e; background:#e4f9f1; border-radius:99px; font-size:6px; font-weight:800; }
+.empty-row { padding:18px 4px !important; color:var(--dash-muted) !important; text-align:center; }
+
+.message-feed { display:grid; max-height:390px; overflow-y:auto; align-content:start; }
+.message-toolbar { display:flex; align-items:center; justify-content:space-between; gap:8px; margin:0 0 9px; }
+.message-filters { display:flex; gap:3px; padding:3px; background:var(--dash-panel-soft); border:1px solid var(--dash-line); border-radius:8px; }
+.message-filter { min-height:25px; padding:0 9px; color:var(--dash-muted); background:transparent; border:0; border-radius:5px; font:700 8px 'Plus Jakarta Sans',sans-serif; cursor:pointer; }
+.message-filter[aria-pressed="true"] { color:#fff; background:var(--dash-blue); box-shadow:0 2px 6px rgba(23,101,239,.2); }
+.message-summary { color:var(--dash-muted); font-size:8px; white-space:nowrap; }
+.message-row { display:grid; grid-template-columns:23px minmax(0,1fr) auto; align-items:start; gap:8px; padding:10px 8px; border:1px solid var(--dash-line); border-radius:8px; background:var(--dash-panel); }
+.message-row + .message-row { margin-top:6px; }
+.message-row.is-unread { border-left:3px solid #ff4c68; padding-left:6px; }
+.message-row.is-reviewed { border-left:3px solid #16b982; padding-left:6px; }
+.message-row:last-child { border-bottom:0; }
+.message-icon { display:grid; width:22px; height:22px; place-items:center; color:#1765ef; background:#e8f0ff; border-radius:7px; font-size:9px; }
+.message-copy { min-width:0; }
+.message-copy strong { display:block; overflow:hidden; color:var(--dash-ink); font-size:9px; text-overflow:ellipsis; white-space:nowrap; }
+.message-copy .message-subject { margin-top:4px; }
+.message-copy p { margin:4px 0 0; color:var(--dash-ink); font-size:9px; line-height:1.5; overflow-wrap:anywhere; }
+.message-meta { display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-top:5px; color:var(--dash-muted); font-size:7px; }
+.message-state { padding:2px 6px; border-radius:99px; background:rgba(255,76,104,.12); color:#d83b58; font-size:7px; font-weight:800; }
+.message-row.is-reviewed .message-state { background:rgba(22,185,130,.12); color:#087c59; }
+.message-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:4px; }
+.message-action { display:inline-flex; align-items:center; gap:5px; min-height:26px; padding:0 7px; border:1px solid var(--dash-line); border-radius:6px; color:var(--dash-ink); background:var(--dash-panel); font:700 7px 'Plus Jakarta Sans',sans-serif; cursor:pointer; }
+.message-action:hover { border-color:var(--dash-blue); color:var(--dash-blue); }
+.message-action.delete { color:#d83b58; }
+.message-action.delete:hover { border-color:#ff4c68; background:rgba(255,76,104,.08); }
+.message-action:disabled { opacity:.55; cursor:wait; }
+
+.calendar-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+.calendar-header strong { color:var(--dash-ink); font-size:9px; }
+.calendar-nav { display:flex; gap:3px; }
+.calendar-nav button { display:grid; width:20px; height:20px; place-items:center; color:var(--dash-muted); background:transparent; border:1px solid var(--dash-line); border-radius:5px; cursor:pointer; font-size:7px; }
+.calendar-nav button:hover { color:var(--dash-blue); border-color:#a9c7ff; }
+.calendar-grid { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:2px; text-align:center; }
+.calendar-weekday { padding:4px 0; color:var(--dash-muted); font-size:6px; font-weight:800; }
+.calendar-day { position:relative; display:grid; min-width:0; aspect-ratio:1; place-items:center; color:var(--dash-ink); background:transparent; border:0; border-radius:5px; cursor:pointer; font:600 7px 'Plus Jakarta Sans',sans-serif; }
+.calendar-day:hover { background:var(--dash-panel-soft); }
+.calendar-day.muted { color:#aab5c8; }
+.calendar-day.today { color:var(--dash-blue); background:#e9f1ff; font-weight:800; }
+.calendar-day.selected { color:#fff; background:var(--dash-blue); }
+.calendar-day.has-attendance:after { position:absolute; right:2px; bottom:2px; width:3px; height:3px; content:''; background:var(--dash-green); border-radius:50%; }
+.calendar-day.selected:after { background:#fff; }
+.calendar-selection { margin-top:7px; padding-top:7px; color:var(--dash-muted); border-top:1px solid var(--dash-line); font-size:7px; }
+
+.activity-list { display:grid; }
+.activity-item { display:grid; grid-template-columns:9px minmax(0,1fr); gap:6px; padding:6px 0; border-bottom:1px solid var(--dash-line); }
+.activity-item:last-child { border-bottom:0; }
+.activity-marker { position:relative; display:flex; justify-content:center; }
+.activity-marker:before { width:6px; height:6px; margin-top:3px; content:''; background:var(--dash-green); border:2px solid #e5f8f1; border-radius:50%; }
+.activity-item.message .activity-marker:before { background:var(--dash-blue); border-color:#e8f0ff; }
+.activity-copy strong { display:block; color:var(--dash-ink); font-size:7px; }
+.activity-copy p { margin:2px 0 0; color:var(--dash-muted); font-size:6px; line-height:1.4; }
+.activity-copy time { display:block; margin-top:3px; color:var(--dash-muted); font-size:6px; }
+
+.dashboard-footer { padding:3px 2px 0; color:var(--dash-muted); font-size:7px; }
+.notification-popover { position:fixed; top:48px; right:12px; z-index:40; width:min(300px,calc(100vw - 24px)); max-height:65vh; overflow:auto; padding:8px; background:var(--dash-panel); border:1px solid var(--dash-line); border-radius:9px; box-shadow:0 12px 35px rgba(20,36,65,.18); }
+.notification-item { border-color:var(--dash-line); }
+
+@media (min-width:1500px) {
+    .dashboard-main { max-width:1600px; padding:15px 20px; }
+    .dashboard-columns { grid-template-columns:minmax(0,1fr) 270px; gap:13px; }
+    .app-sidebar { width:190px; }
+    .dashboard-main { margin-left:190px; }
+}
+
+@media (max-width:1050px) {
+    .dashboard-columns { grid-template-columns:minmax(0,1fr) 205px; }
+    .dashboard-topbar { grid-template-columns:minmax(130px,1fr) minmax(160px,300px) auto auto; }
+    .middle-grid { grid-template-columns:minmax(0,1fr); }
+    .quick-actions { grid-template-columns:repeat(4,minmax(0,1fr)); }
+}
+
+@media (max-width:760px) {
+    .app-sidebar { position:sticky; top:0; width:auto; height:auto; padding:8px; }
+    .sidebar-brand { min-height:27px; padding:0 3px 7px; }
+    .sidebar-label,.sidebar-footer { display:none; }
+    .sidebar-nav { display:flex; overflow-x:auto; gap:4px; padding-top:6px; }
+    .sidebar-nav a,.sidebar-nav button { flex:0 0 auto; width:auto; min-height:30px; padding:7px; }
+    .sidebar-nav a span,.sidebar-nav button span { display:none; }
+    .sidebar-nav a i,.sidebar-nav button i { width:16px; }
+    .dashboard-main { margin-left:0; padding:9px; }
+    .dashboard-topbar { grid-template-columns:minmax(0,1fr) auto auto; gap:7px; }
+    .top-search { grid-column:1/-1; grid-row:2; }
+    .profile-summary { min-width:0; border:0; padding:0; }
+    .profile-summary div:last-child { display:none; }
+    .dashboard-columns { grid-template-columns:minmax(0,1fr); }
+    .dashboard-rail { grid-template-columns:repeat(2,minmax(0,1fr)); align-items:start; }
+    .stat-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .message-row { grid-template-columns:23px minmax(0,1fr); }
+    .message-actions { grid-column:2; justify-content:flex-start; }
+}
+
+@media (max-width:480px) {
+    .welcome-banner { min-height:68px; padding:12px; }
+    .welcome-copy h1 { font-size:15px; }
+    .stat-card { gap:7px; padding:7px; }
+    .middle-grid,.recent-grid { grid-template-columns:minmax(0,1fr); }
+    .attendance-visuals { grid-template-columns:112px minmax(0,1fr); }
+    .quick-actions { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .dashboard-rail { grid-template-columns:minmax(0,1fr); }
+    .top-search button { min-width:36px; width:36px; padding:0; }
+    .top-search .search-submit-label { display:none; }
+}
+
+@media (max-width: 980px) {
+    body { display:block; }
+    nav {
+        position:static; width:100%; height:auto;
+    }
+    main {
+        margin-left:0; width:100%; padding:28px 18px 42px;
+    }
+    .nav-links {
+        display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+}
+
+@media (max-width: 620px) {
+    .top-bar {
+        align-items:flex-start;
+    }
+    .top-bar-right {
+        width:100%; justify-content:flex-end;
+    }
+    .search-box {
+        flex-direction:column;
+    }
+    .search-box button {
+        min-height:48px;
+    }
+    .attendance-metrics {
+        grid-template-columns:1fr;
+    }
+    .attendance-metric + .attendance-metric {
+        border-left:none; border-top:1px solid var(--line);
+    }
+}
+
+/* Responsive dashboard layout and readable control sizing. */
+.app-sidebar {
+    width:216px;
+    padding:18px 12px 14px;
+    overflow-y:auto;
+}
+
+.sidebar-brand {
+    gap:10px;
+    min-height:42px;
+    padding:0 6px 14px;
+    font-size:17px;
+}
+
+.sidebar-brand-mark { width:32px; height:32px; }
+.sidebar-label { margin:20px 8px 8px; font-size:10px; }
+.sidebar-nav { gap:4px; }
+.sidebar-nav a,.sidebar-nav button { min-height:40px; padding:9px 10px; font-size:12px; }
+.sidebar-nav a i,.sidebar-nav button i { width:16px; font-size:14px; }
+.sidebar-footer { font-size:10px; }
+.sidebar-footer strong { font-size:11px; }
+
+.dashboard-main {
+    width:auto;
+    max-width:1760px;
+    margin-left:216px;
+    padding:clamp(18px,2.2vw,34px) clamp(18px,2.5vw,40px) 32px;
+}
+
+.dashboard-topbar {
+    grid-template-columns:minmax(175px,1fr) minmax(260px, min(40vw, 500px)) auto auto;
+    gap:16px;
+    min-height:48px;
+    margin-bottom:20px;
+}
+
+.school-name { font-size:22px; }
+.school-date { font-size:12px; }
+.top-search { height:46px; }
+.top-search input { font-size:13px; }
+.top-search button { min-width:82px; height:36px; font-size:12px; }
+.top-icon-button { width:40px; height:40px; font-size:15px; }
+.profile-summary { gap:9px; min-width:145px; }
+.profile-avatar { width:34px; height:34px; font-size:11px; }
+.profile-summary strong { font-size:12px; }
+.profile-summary small { font-size:10px; }
+
+.dashboard-columns {
+    grid-template-columns:minmax(0,1fr) minmax(255px,300px);
+    gap:16px;
+}
+
+.dashboard-primary,.dashboard-rail { gap:14px; }
+.welcome-banner { min-height:104px; padding:20px 24px; border-radius:12px; }
+.welcome-copy h1 { font-size:clamp(20px,2vw,27px); }
+.welcome-copy p { font-size:13px; }
+.welcome-graphic { font-size:40px; }
+.stat-grid { gap:12px; }
+.stat-card { min-height:82px; gap:12px; padding:13px; border-radius:10px; }
+.stat-icon { flex-basis:38px; width:38px; height:38px; font-size:15px; }
+.stat-label { font-size:11px; }
+.stat-value { margin-top:5px; font-size:21px; }
+.stat-note { margin-top:4px; font-size:10px; }
+
+.dashboard-panel { padding:16px; border-radius:12px; }
+.panel-heading { gap:12px; margin-bottom:14px; }
+.panel-heading h2,.panel-heading h3 { font-size:15px; }
+.panel-heading p { margin-top:4px; font-size:11px; }
+.panel-link,.panel-action { font-size:11px; }
+.panel-action { min-height:32px; padding:0 8px; }
+.middle-grid { gap:14px; }
+.middle-grid > .dashboard-panel,.recent-grid > .dashboard-panel,.dashboard-rail > .dashboard-panel:last-child { min-height:0; }
+.attendance-visuals { grid-template-columns:minmax(125px, .8fr) minmax(0,1.2fr); gap:14px; }
+.attendance-donut { width:100px; height:100px; }
+.donut-hole { width:76px; height:76px; }
+.donut-hole strong { font-size:17px; }
+.donut-hole span,.legend-item,.legend-item strong,.trend-title,.trend-footnote { font-size:10px; }
+.legend-list { gap:7px; }
+.legend-dot { width:8px; height:8px; }
+.trend-wrap { padding-left:12px; }
+.trend-chart { height:100px; gap:8px; }
+.trend-day span { font-size:9px; }
+.quick-actions { gap:8px; }
+.quick-action { min-height:42px; gap:8px; padding:8px; border-radius:8px; font-size:10px; }
+.quick-action i { flex:0 0 25px; width:25px; height:25px; font-size:11px; }
+.recent-grid { gap:14px; }
+.data-table th { padding:9px 7px; font-size:9px; }
+.data-table td { padding:9px 7px; font-size:10px; }
+.person-cell { gap:7px; }
+.person-avatar { flex-basis:24px; width:24px; height:24px; font-size:9px; }
+.status-pill { padding:4px 7px; font-size:9px; }
+.message-feed { max-height:480px; }
+.message-toolbar { flex-wrap:wrap; }
+.message-filter { min-height:32px; padding:0 10px; font-size:10px; }
+.message-summary { font-size:10px; }
+.message-row { grid-template-columns:32px minmax(0,1fr) auto; gap:10px; padding:12px; border-radius:10px; }
+.message-icon { width:30px; height:30px; font-size:12px; }
+.message-copy strong,.message-copy p { font-size:11px; }
+.message-meta { font-size:9px; }
+.message-state { font-size:9px; }
+.message-action { min-height:32px; padding:0 9px; font-size:10px; }
+.calendar-header strong { font-size:13px; }
+.calendar-nav button { width:30px; height:30px; font-size:11px; }
+.calendar-grid { gap:4px; }
+.calendar-weekday { padding:6px 0; font-size:9px; }
+.calendar-day { font-size:10px; }
+.calendar-selection { margin-top:10px; padding-top:10px; font-size:10px; }
+.activity-item { grid-template-columns:12px minmax(0,1fr); gap:9px; padding:9px 0; }
+.activity-copy strong { font-size:10px; }
+.activity-copy p,.activity-copy time { font-size:9px; }
+.dashboard-footer { padding-top:6px; font-size:10px; }
+
+@media (max-width:1200px) and (min-width:981px) {
+    .dashboard-columns { grid-template-columns:minmax(0,1fr) 255px; }
+    .middle-grid { grid-template-columns:minmax(0,1fr); }
+}
+
+@media (max-width:980px) {
+    .app-sidebar {
+        position:static;
+        width:100%;
+        height:auto;
+        max-height:none;
+        padding:12px 16px;
+        overflow:visible;
+    }
+
+    .sidebar-brand { min-height:38px; padding:0 4px 10px; }
+    .sidebar-label { display:block; margin:12px 4px 6px; }
+    .sidebar-footer { display:none; }
+    .sidebar-nav {
+        display:grid;
+        grid-template-columns:repeat(auto-fit,minmax(125px,1fr));
+        gap:6px;
+        overflow:visible;
+        padding:0;
+    }
+
+    .sidebar-nav + .sidebar-label { margin-top:10px; }
+    .sidebar-nav a,.sidebar-nav button {
+        justify-content:flex-start;
+        width:100%;
+        min-height:40px;
+        padding:8px 10px;
+        white-space:normal;
+    }
+
+    .sidebar-nav a span,.sidebar-nav button span { display:inline; }
+    .sidebar-nav .sidebar-badge { display:none; }
+    .sidebar-nav a i,.sidebar-nav button i { flex:0 0 18px; width:18px; }
+    .dashboard-main { width:100%; max-width:none; margin:0; padding:22px clamp(16px,3vw,30px) 30px; }
+    .dashboard-topbar { grid-template-columns:minmax(0,1fr) auto auto; gap:12px; }
+    .top-search { grid-column:1/-1; grid-row:2; }
+    .profile-summary { min-width:0; border:0; padding:0; }
+    .profile-summary div:last-child { display:block; }
+    .dashboard-columns { grid-template-columns:minmax(0,1fr); }
+    .dashboard-rail { grid-template-columns:repeat(2,minmax(0,1fr)); align-items:start; }
+    .middle-grid { grid-template-columns:minmax(0,1.35fr) minmax(220px,.85fr); }
+}
+
+@media (max-width:700px) {
+    .dashboard-main { padding:18px 14px 24px; }
+    .dashboard-topbar { grid-template-columns:minmax(0,1fr) auto auto; margin-bottom:16px; }
+    .school-name { font-size:20px; }
+    .profile-summary { display:none; }
+    .welcome-banner { min-height:94px; padding:17px; }
+    .welcome-copy h1 { max-width:28ch; font-size:20px; }
+    .welcome-copy p { max-width:34ch; font-size:12px; line-height:1.5; }
+    .stat-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .middle-grid,.recent-grid { grid-template-columns:minmax(0,1fr); }
+    .middle-grid > .dashboard-panel,.recent-grid > .dashboard-panel { min-height:0; }
+    .dashboard-rail { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .message-row { grid-template-columns:30px minmax(0,1fr); }
+    .message-actions { grid-column:2; justify-content:flex-start; }
+}
+
+@media (max-width:480px) {
+    .app-sidebar { padding:10px 12px; }
+    .sidebar-nav { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .sidebar-nav a,.sidebar-nav button { min-height:42px; padding:8px; font-size:11px; }
+    .dashboard-main { padding:16px 12px 22px; }
+    .dashboard-topbar { gap:8px; }
+    .school-name { font-size:18px; }
+    .school-date { font-size:10px; }
+    .top-icon-button { width:36px; height:36px; }
+    .top-search { height:44px; padding-left:10px; }
+    .top-search button { min-width:36px; width:36px; padding:0; }
+    .top-search .search-submit-label { display:none; }
+    .welcome-banner { min-height:88px; padding:14px; }
+    .welcome-copy h1 { font-size:17px; }
+    .welcome-copy p { font-size:11px; }
+    .welcome-graphic { padding:0 4px; font-size:27px; }
+    .stat-grid { gap:8px; }
+    .stat-card { min-height:72px; gap:8px; padding:9px; }
+    .stat-icon { flex-basis:32px; width:32px; height:32px; font-size:13px; }
+    .stat-label { font-size:9px; }
+    .stat-value { font-size:18px; }
+    .stat-note { font-size:8px; }
+    .dashboard-panel { padding:13px; }
+    .panel-heading h2,.panel-heading h3 { font-size:14px; }
+    .panel-heading p { font-size:10px; }
+    .attendance-visuals { grid-template-columns:minmax(0,1fr); }
+    .donut-wrap { grid-template-columns:100px minmax(0,1fr); align-items:center; width:100%; }
+    .trend-wrap { padding:12px 0 0; border-top:1px solid var(--dash-line); border-left:0; }
+    .dashboard-rail { grid-template-columns:minmax(0,1fr); }
+    .data-table th { padding:8px 4px; font-size:8px; }
+    .data-table td { padding:8px 4px; font-size:9px; }
+    .message-toolbar { align-items:flex-start; flex-direction:column; }
+    .message-filters { max-width:100%; }
+    .message-filter { padding:0 8px; font-size:9px; }
+    .message-summary { white-space:normal; }
+    .message-row { gap:8px; padding:10px; }
+    .message-action { min-height:34px; }
+}
+
+@media (prefers-reduced-motion:reduce) {
+    .sidebar-nav a,.dashboard-card,.top-search,.top-search button { transition:none; }
+}
+</style>
+</head>
+<body>
+<div id="adminProgress" class="progress-bar"><span></span></div>
+
+<aside class="app-sidebar" aria-label="Main navigation">
+    <div class="sidebar-brand"><span class="sidebar-brand-mark"><i class="fas fa-graduation-cap"></i></span> SmartSchool</div>
+    <div class="sidebar-label">School menu</div>
+    <nav class="sidebar-nav">
+        <a href="admin.html" class=""><i class="fas fa-house"></i><span>Dashboard</span></a>
+        <a href="attendance.html"><i class="fas fa-calendar-check"></i><span>Attendance</span></a>
+        <a href="teachers.html"><i class="fas fa-chalkboard-user"></i><span>Teachers</span></a>
+        <a href="report.html"><i class="fas fa-chart-column"></i><span>Daily Report</span></a>
+        <a href="monthly_report.html"><i class="fas fa-book-open"></i><span>Monthly Report</span></a>
+        <a href="messages.html"><i class="fas fa-message"></i><span>Messages</span><span id="messageBadge" class="sidebar-badge">0</span></a>
+        <a href="settings.html" data-role-link="super_admin" hidden><i class="fas fa-gear"></i><span>Settings</span></a>
+    </nav>
+    <div class="sidebar-label">Admin tools</div>
+    <nav class="sidebar-nav">
+        <a href="teachers.html"><i class="fas fa-user-plus"></i><span>Manage Staff</span></a>
+        <button id="sidebarThemeToggle" data-theme-toggle type="button"><i class="fas fa-moon"></i><span>Dark mode</span></button>
+        <button id="logoutButton" type="button"><i class="fas fa-right-from-bracket"></i><span>Log out</span></button>
+    </nav>
+    <div class="sidebar-footer"><strong>Better Education</strong>Brighter Future</div>
+</aside>
+
+<main class="dashboard-main">
+    <header class="dashboard-topbar">
+        <div>
+            <h1 class="school-name">MUBUGA TSS</h1>
+            <p id="currentDate" class="school-date"></p>
+        </div>
+        <form class="top-search" action="report.html" method="GET" role="search" aria-label="Search attendance by teacher">
+            <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+            <input name="teacher" type="search" aria-label="Search attendance by teacher name" placeholder="Search attendance by teacher name...">
+            <button type="submit" aria-label="Search attendance"><span class="search-submit-label">Search</span><i class="fas fa-arrow-right" aria-hidden="true"></i></button>
+        </form>
+        <button id="adminNotifyBtn" class="top-icon-button" type="button" aria-label="Notifications" title="Notifications">
+            <i class="fas fa-bell" aria-hidden="true"></i>
+            <span id="adminNotifyBadge" class="sidebar-badge">0</span>
+        </button>
+        <div class="profile-summary">
+            <div class="profile-avatar" aria-hidden="true">AD</div>
+            <div><strong>School Admin</strong><small><i class="fas fa-circle" style="color:#16b982;font-size:6px;"></i> Online</small></div>
+        </div>
+    </header>
+
+    <div class="dashboard-columns">
+        <section class="dashboard-primary" aria-label="School overview">
+            <section class="welcome-banner">
+                <div class="welcome-copy">
+                    <h1>Welcome back, Administrator!</h1>
+                    <p>Here is what's happening at your school today.</p>
+                </div>
+                <div class="welcome-graphic" aria-hidden="true"><i class="fas fa-graduation-cap"></i></div>
+            </section>
+
+            <section class="stat-grid" aria-label="Today's staff statistics">
+                <article class="stat-card">
+                    <span class="stat-icon blue"><i class="fas fa-users"></i></span>
+                    <div><span class="stat-label">Total Teachers</span><strong id="totalTeacherCount" class="stat-value">--</strong><small class="stat-note">Registered staff</small></div>
+                </article>
+                <article class="stat-card">
+                    <span class="stat-icon green"><i class="fas fa-user-check"></i></span>
+                    <div><span class="stat-label">Present Today</span><strong id="presentCount" class="stat-value">--</strong><small class="stat-note">Checked in</small></div>
+                </article>
+                <article class="stat-card">
+                    <span class="stat-icon purple"><i class="fas fa-chart-pie"></i></span>
+                    <div><span class="stat-label">Attendance Rate</span><strong id="attendanceRate" class="stat-value">--</strong><small class="stat-note">Today's staff attendance</small></div>
+                </article>
+                <article class="stat-card">
+                    <span class="stat-icon orange"><i class="fas fa-envelope-open-text"></i></span>
+                    <div><span class="stat-label">Teacher Reports</span><strong id="teacherMessageCount" class="stat-value">--</strong><small class="stat-note">Recent messages</small></div>
+                </article>
+            </section>
+
+            <div class="middle-grid">
+                <section class="dashboard-panel" aria-labelledby="attendanceOverviewTitle" aria-busy="true">
+                    <div class="panel-heading">
+                        <div><h2 id="attendanceOverviewTitle">Attendance Overview</h2><p id="attendanceSummaryDate">Daily staff attendance summary</p></div>
+                        <button id="refreshAttendanceSummary" class="panel-action" type="button" title="Refresh attendance data"><i class="fas fa-rotate" aria-hidden="true"></i> Refresh</button>
+                    </div>
+                    <div class="attendance-visuals">
+                        <div class="donut-wrap">
+                            <div id="attendanceDonut" class="attendance-donut" role="img" aria-label="Today's teacher attendance rate">
+                                <div class="donut-hole"><strong id="donutRate">--</strong><span>Present</span></div>
+                            </div>
+                            <div class="legend-list">
+                                <div class="legend-item"><span class="legend-dot"></span>Present<strong id="legendPresent">--</strong></div>
+                                <div class="legend-item"><span class="legend-dot absent"></span>Not checked in<strong id="legendAbsent">--</strong></div>
+                            </div>
+                        </div>
+                        <div class="trend-wrap">
+                            <div class="trend-title"><strong>Attendance trend</strong><span>Last 7 days</span></div>
+                            <div id="attendanceTrend" class="trend-chart" aria-label="Attendance over the last seven days"></div>
+                            <p id="trendFootnote" class="trend-footnote">Loading attendance history...</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="dashboard-panel" aria-labelledby="quickActionsTitle">
+                    <div class="panel-heading"><div><h2 id="quickActionsTitle">Quick Actions</h2><p>Common school admin tasks</p></div></div>
+                    <div class="quick-actions">
+                        <a class="quick-action" href="attendance.html"><i class="fas fa-user-check"></i>Mark Attendance</a>
+                        <a class="quick-action" href="teachers.html"><i class="fas fa-user-plus"></i>Add Teacher</a>
+                        <a class="quick-action" href="teachers.html"><i class="fas fa-users-gear"></i>Manage Staff</a>
+                        <a class="quick-action" href="report.html"><i class="fas fa-chart-line"></i>View Reports</a>
+                    </div>
+                </section>
+            </div>
+
+            <div class="recent-grid">
+                <section class="dashboard-panel" aria-labelledby="recentAttendanceTitle">
+                    <div class="panel-heading"><div><h2 id="recentAttendanceTitle">Recent Attendance Records</h2><p>Latest staff check-ins</p></div><a class="panel-link" href="report.html">View all</a></div>
+                    <table class="data-table">
+                        <thead><tr><th>Teacher</th><th>Date</th><th>Time</th><th>Status</th></tr></thead>
+                        <tbody id="recentCheckins"><tr><td class="empty-row" colspan="4">Loading attendance...</td></tr></tbody>
+                    </table>
+                </section>
+                <section id="messages" class="dashboard-panel" aria-labelledby="recentMessagesTitle">
+                    <div class="panel-heading"><div><h2 id="recentMessagesTitle">Recent Messages</h2><p>Teacher reports and requests</p></div><button id="refreshMessages" class="panel-action" type="button">Refresh</button></div>
+                    <div class="message-toolbar">
+                        <div class="message-filters" role="group" aria-label="Filter teacher messages">
+                            <button class="message-filter" type="button" data-message-filter="all" aria-pressed="true">All</button>
+                            <button class="message-filter" type="button" data-message-filter="unread" aria-pressed="false">Unread</button>
+                            <button class="message-filter" type="button" data-message-filter="reviewed" aria-pressed="false">Reviewed</button>
+                        </div>
+                        <span id="messageSummary" class="message-summary" aria-live="polite">Loading messages...</span>
+                    </div>
+                    <div id="teacherMessages" class="message-feed"><div class="empty-row">Loading messages...</div></div>
+                </section>
+            </div>
+
+            <footer class="dashboard-footer">&copy; <span id="year"></span> SmartSchool <span aria-hidden="true">&bull;</span> MUBUGA TSS</footer>
+        </section>
+
+        <aside class="dashboard-rail" aria-label="School calendar and activity">
+            <section class="dashboard-panel" aria-labelledby="calendarTitle">
+                <div class="panel-heading"><div><h2 id="calendarTitle">Calendar</h2><p>Attendance dates</p></div></div>
+                <div class="calendar-header">
+                    <button id="calendarPrev" class="calendar-nav" type="button" aria-label="Previous month"><i class="fas fa-chevron-left"></i></button>
+                    <strong id="calendarMonthLabel"></strong>
+                    <button id="calendarNext" class="calendar-nav" type="button" aria-label="Next month"><i class="fas fa-chevron-right"></i></button>
+                </div>
+                <div id="calendarGrid" class="calendar-grid" role="grid" aria-label="Attendance calendar"></div>
+                <p id="calendarSelection" class="calendar-selection">Select a date to view attendance.</p>
+            </section>
+            <section class="dashboard-panel" aria-labelledby="activityTitle">
+                <div class="panel-heading"><div><h2 id="activityTitle">School Activity</h2><p>Latest updates</p></div><button id="refreshActivity" class="panel-action" type="button" aria-label="Refresh dashboard activity"><i class="fas fa-rotate"></i></button></div>
+                <div id="activityList" class="activity-list"><div class="empty-row">Loading activity...</div></div>
+            </section>
+        </aside>
+    </div>
+</main>
+
+<div id="adminNotificationDropdown" class="notification-popover" hidden>
+    <div class="panel-heading"><h2>Notifications</h2><button id="closeNotifications" class="panel-action" type="button" aria-label="Close notifications"><i class="fas fa-xmark"></i></button></div>
+    <div id="adminNotificationList">Loading notifications...</div>
+</div>
+
+<script>
+let today = new Date();
+const adminProgress = document.getElementById('adminProgress');
+const attendancePanel = document.querySelector('[aria-labelledby="attendanceOverviewTitle"]');
+const teacherMessages = document.getElementById('teacherMessages');
+const attendanceRows = document.getElementById('recentCheckins');
+const activityList = document.getElementById('activityList');
+const notificationDropdown = document.getElementById('adminNotificationDropdown');
+const notificationList = document.getElementById('adminNotificationList');
+const attendanceRecordsByDate = new Map();
+let attendanceHistory = [];
+let recentAttendanceActivity = [];
+let teacherMessagesData = [];
+let teacherMessageFilter = 'all';
+let calendarMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+let selectedCalendarDate = dateKey(today);
+
+document.getElementById('year').textContent = today.getFullYear();
+document.getElementById('currentDate').textContent = today.toLocaleDateString('en-US', {
+    weekday:'long', year:'numeric', month:'long', day:'numeric'
+});
+
+function dateKey(date) {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
+function setText(id, value) {
+    document.getElementById(id).textContent = value;
+}
+
+function showProgress() {
+    adminProgress.style.display = 'block';
+    adminProgress.firstElementChild.style.width = '35%';
+}
+
+function hideProgress() {
+    adminProgress.firstElementChild.style.width = '100%';
+    window.setTimeout(() => {
+        adminProgress.style.display = 'none';
+        adminProgress.firstElementChild.style.width = '0';
+    }, 180);
+}
+
+function setTheme(theme, persist = true) {
+    document.documentElement.dataset.theme = theme;
+    if (persist) localStorage.setItem('smartschool-theme', theme);
+    const themeToggle = document.getElementById('sidebarThemeToggle');
+    themeToggle.setAttribute('aria-label', theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
+    themeToggle.querySelector('span').textContent = theme === 'dark' ? 'Light mode' : 'Dark mode';
+    themeToggle.querySelector('i').className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+}
+
+document.getElementById('sidebarThemeToggle').addEventListener('click', () => {
+    setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+});
+const savedTheme = localStorage.getItem('smartschool-theme');
+const preferredTheme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+setTheme(savedTheme || preferredTheme, Boolean(savedTheme));
+
+document.getElementById('logoutButton').addEventListener('click', async () => {
+    const button = document.getElementById('logoutButton');
+    button.disabled = true;
+    try {
+        const response = await fetch('/logout', { method:'POST' });
+        if (!response.ok) throw new Error('Logout request failed.');
+        window.location.assign('index.html');
+    } catch (error) {
+        button.disabled = false;
+        alert('Unable to sign out. Please try again.');
+    }
+});
+
+function setEmptyRow(container, message, columns = 1) {
+    const row = document.createElement('tr');
+    const cell = document.createElement('td');
+    cell.className = 'empty-row';
+    cell.colSpan = columns;
+    cell.textContent = message;
+    row.append(cell);
+    container.replaceChildren(row);
+}
+
+function makeAvatar(name) {
+    const avatar = document.createElement('span');
+    avatar.className = 'person-avatar';
+    avatar.textContent = (name || '?').trim().split(/\s+/).slice(0, 2).map(part => part[0]).join('').toUpperCase();
+    return avatar;
+}
+
+function renderRecentAttendance(records) {
+    attendanceRows.replaceChildren();
+    if (!records.length) {
+        setEmptyRow(attendanceRows, 'No attendance recorded today.', 4);
+        return;
+    }
+
+    records.slice(0, 5).forEach(record => {
+        const row = document.createElement('tr');
+        const personCell = document.createElement('td');
+        const person = document.createElement('span');
+        person.className = 'person-cell';
+        person.append(makeAvatar(record.name));
+        const name = document.createElement('span');
+        name.textContent = record.name || 'Teacher';
+        person.append(name);
+        personCell.append(person);
+
+        const timestamp = new Date(record.status_time);
+        const dateCell = document.createElement('td');
+        dateCell.textContent = timestamp.toLocaleDateString([], { month:'short', day:'numeric' });
+        const timeCell = document.createElement('td');
+        timeCell.textContent = timestamp.toLocaleTimeString([], { hour:'numeric', minute:'2-digit' });
+        const statusCell = document.createElement('td');
+        const status = document.createElement('span');
+        status.className = 'status-pill';
+        status.textContent = 'Present';
+        statusCell.append(status);
+        row.append(personCell, dateCell, timeCell, statusCell);
+        attendanceRows.append(row);
+    });
+}
+
+function renderAttendanceTrend() {
+    const trend = document.getElementById('attendanceTrend');
+    trend.replaceChildren();
+    const days = Array.from({ length:7 }, (_, offset) => {
+        const day = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 6 + offset);
+        const key = dateKey(day);
+        const count = attendanceRecordsByDate.get(key)?.length || 0;
+        return { day, count };
+    });
+    const max = Math.max(1, ...days.map(item => item.count));
+
+    days.forEach(({ day, count }) => {
+        const column = document.createElement('div');
+        column.className = 'trend-day';
+        const bar = document.createElement('div');
+        bar.className = 'trend-bar';
+        bar.style.height = `${Math.max(4, Math.round((count / max) * 62))}px`;
+        bar.title = `${day.toLocaleDateString([], { weekday:'long', month:'short', day:'numeric' })}: ${count} present`;
+        const label = document.createElement('span');
+        label.textContent = day.toLocaleDateString([], { weekday:'short' });
+        column.append(bar, label);
+        trend.append(column);
+    });
+    setText('trendFootnote', 'Daily teacher check-ins from attendance records.');
+}
+
+function renderCalendar() {
+    const grid = document.getElementById('calendarGrid');
+    const monthLabel = document.getElementById('calendarMonthLabel');
+    monthLabel.textContent = calendarMonth.toLocaleDateString('en-US', { month:'long', year:'numeric' });
+    grid.replaceChildren();
+    ['Su','Mo','Tu','We','Th','Fr','Sa'].forEach(day => {
+        const heading = document.createElement('span');
+        heading.className = 'calendar-weekday';
+        heading.setAttribute('role', 'columnheader');
+        heading.textContent = day;
+        grid.append(heading);
+    });
+
+    const firstWeekday = calendarMonth.getDay();
+    const daysInMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 0).getDate();
+    const previousMonthDays = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), 0).getDate();
+    const cellCount = Math.ceil((firstWeekday + daysInMonth) / 7) * 7;
+
+    for (let index = 0; index < cellCount; index += 1) {
+        let dayNumber = index - firstWeekday + 1;
+        let dayDate;
+        let isMuted = false;
+        if (dayNumber < 1) {
+            dayNumber = previousMonthDays + dayNumber;
+            dayDate = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, dayNumber);
+            isMuted = true;
+        } else if (dayNumber > daysInMonth) {
+            dayNumber -= daysInMonth;
+            dayDate = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, dayNumber);
+            isMuted = true;
+        } else {
+            dayDate = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), dayNumber);
+        }
+
+        const key = dateKey(dayDate);
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'calendar-day';
+        button.setAttribute('role', 'gridcell');
+        button.textContent = dayNumber;
+        button.setAttribute('aria-label', dayDate.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' }));
+        if (isMuted) button.classList.add('muted');
+        if (key === dateKey(today)) button.classList.add('today');
+        if (key === selectedCalendarDate) button.classList.add('selected');
+        if (attendanceRecordsByDate.has(key)) button.classList.add('has-attendance');
+        button.addEventListener('click', () => {
+            selectedCalendarDate = key;
+            renderCalendar();
+            const count = attendanceRecordsByDate.get(key)?.length || 0;
+            const dateLabel = dayDate.toLocaleDateString('en-US', { month:'long', day:'numeric' });
+            setText('calendarSelection', count ? `${dateLabel}: ${count} teacher check-in${count === 1 ? '' : 's'}.` : `${dateLabel}: no attendance records.`);
+        });
+        grid.append(button);
+    }
+}
+
+function updateTeacherMessageBadges() {
+    const unreadCount = teacherMessagesData.filter(message => message.status !== 'reviewed').length;
+    const badge = document.getElementById('messageBadge');
+    setText('teacherMessageCount', teacherMessagesData.length);
+    badge.textContent = unreadCount;
+    badge.style.display = unreadCount ? 'inline-flex' : 'none';
+    setText('messageSummary', `${unreadCount} unread · ${teacherMessagesData.length - unreadCount} reviewed`);
+}
+
+function renderMessages(messages) {
+    teacherMessages.replaceChildren();
+    const unreadCount = messages.filter(message => message.status !== 'reviewed').length;
+    setText('messageSummary', `${unreadCount} unread · ${messages.length - unreadCount} reviewed`);
+    updateTeacherMessageBadges();
+    const visibleMessages = messages.filter(message => {
+        if (teacherMessageFilter === 'unread') return message.status !== 'reviewed';
+        if (teacherMessageFilter === 'reviewed') return message.status === 'reviewed';
+        return true;
+    });
+
+    if (!visibleMessages.length) {
+        const empty = document.createElement('div');
+        empty.className = 'empty-row';
+        empty.textContent = messages.length ? `No ${teacherMessageFilter} teacher messages.` : 'No teacher messages yet.';
+        teacherMessages.append(empty);
+        return;
+    }
+
+    visibleMessages.forEach(message => {
+        const isReviewed = message.status === 'reviewed';
+        const row = document.createElement('article');
+        row.className = `message-row${isReviewed ? ' is-reviewed' : ' is-unread'}`;
+        const icon = document.createElement('span');
+        icon.className = 'message-icon';
+        icon.innerHTML = '<i class="fas fa-message" aria-hidden="true"></i>';
+        const copy = document.createElement('div');
+        copy.className = 'message-copy';
+        const sender = document.createElement('strong');
+        sender.textContent = `${message.sender_name || 'Teacher'} · ${(message.sender_role || 'teacher').replace('_', ' ')}`;
+        const body = document.createElement('p');
+        body.textContent = message.message || '';
+        const meta = document.createElement('div');
+        meta.className = 'message-meta';
+        const createdAt = new Date(message.created_at);
+        if (!Number.isNaN(createdAt.getTime())) {
+            const time = document.createElement('time');
+            time.dateTime = createdAt.toISOString();
+            time.textContent = createdAt.toLocaleString([], { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
+            meta.append(time);
+        }
+        const status = document.createElement('span');
+        status.className = 'message-state';
+        status.textContent = isReviewed ? 'Reviewed' : 'Needs review';
+        meta.append(status);
+        if (message.subject) {
+            const subject = document.createElement('strong');
+            subject.className = 'message-subject';
+            subject.textContent = message.subject;
+            copy.append(subject);
+        }
+        copy.append(sender, body, meta);
+
+        const actions = document.createElement('div');
+        actions.className = 'message-actions';
+        const actionButton = document.createElement('button');
+        actionButton.type = 'button';
+        actionButton.className = isReviewed ? 'message-action delete' : 'message-action';
+        if (isReviewed) {
+            actionButton.innerHTML = '<i class="fas fa-trash" aria-hidden="true"></i> Delete';
+            actionButton.addEventListener('click', () => deleteTeacherMessage(message.id, actionButton));
+        } else {
+            actionButton.innerHTML = '<i class="fas fa-check" aria-hidden="true"></i> Mark reviewed';
+            actionButton.addEventListener('click', () => reviewTeacherMessage(message.id, actionButton));
+        }
+        actions.append(actionButton);
+        row.append(icon, copy, actions);
+        teacherMessages.append(row);
+    });
+}
+
+function setTeacherMessageFilter(filter) {
+    teacherMessageFilter = filter;
+    document.querySelectorAll('[data-message-filter]').forEach(button => {
+        button.setAttribute('aria-pressed', String(button.dataset.messageFilter === filter));
+    });
+    renderMessages(teacherMessagesData);
+}
+
+async function reviewTeacherMessage(messageId, button) {
+    button.disabled = true;
+    try {
+        const response = await fetch(`/messages/teacher/${Number(messageId)}/review`, { method:'PATCH' });
+        const result = await response.json();
+        if (!response.ok || result.status !== 'success') throw new Error(result.message || 'Unable to review message.');
+        await loadTeacherMessages();
+    } catch (error) {
+        alert(error.message || 'Unable to review message.');
+        button.disabled = false;
+    }
+}
+
+async function deleteTeacherMessage(messageId, button) {
+    if (!confirm('Delete this reviewed message? This cannot be undone.')) return;
+    button.disabled = true;
+    try {
+        const response = await fetch(`/messages/teacher/${Number(messageId)}`, { method:'DELETE' });
+        const result = await response.json();
+        if (!response.ok || result.status !== 'success') throw new Error(result.message || 'Unable to delete message.');
+        await loadTeacherMessages();
+    } catch (error) {
+        alert(error.message || 'Unable to delete message.');
+        button.disabled = false;
+    }
+}
+
+function renderActivity() {
+    const now = new Date();
+    const activityStart = new Date(now);
+    activityStart.setHours(0, 0, 0, 0);
+    activityStart.setDate(activityStart.getDate() - 6);
+    const entries = [
+        ...recentAttendanceActivity.map(record => ({
+            type:'attendance',
+            label:`${record.name} checked in`,
+            detail:'Teacher attendance recorded',
+            timestamp:new Date(record.timestamp)
+        })),
+        ...teacherMessagesData.map(message => ({
+            type:'message',
+            label:`${message.sender_name || 'Teacher'} sent a report`,
+            detail:message.message || 'New teacher report',
+            timestamp:new Date(message.created_at)
+        }))
+    ].filter(entry =>
+        !Number.isNaN(entry.timestamp.getTime()) &&
+        entry.timestamp >= activityStart &&
+        entry.timestamp <= now
+    )
+        .sort((left, right) => right.timestamp - left.timestamp)
+        .slice(0, 5);
+
+    activityList.replaceChildren();
+    if (!entries.length) {
+        const empty = document.createElement('div');
+        empty.className = 'empty-row';
+        empty.textContent = 'No recent activity.';
+        activityList.append(empty);
+        return;
+    }
+
+    entries.forEach(entry => {
+        const item = document.createElement('article');
+        item.className = `activity-item${entry.type === 'message' ? ' message' : ''}`;
+        const marker = document.createElement('span');
+        marker.className = 'activity-marker';
+        const copy = document.createElement('div');
+        copy.className = 'activity-copy';
+        const title = document.createElement('strong');
+        title.textContent = entry.label;
+        const detail = document.createElement('p');
+        detail.textContent = entry.detail;
+        const time = document.createElement('time');
+        time.dateTime = entry.timestamp.toISOString();
+        time.textContent = entry.timestamp.toLocaleString([], { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
+        copy.append(title, detail, time);
+        item.append(marker, copy);
+        activityList.append(item);
+    });
+}
+
+async function loadAttendanceSummary() {
+    const refreshButton = document.getElementById('refreshAttendanceSummary');
+    refreshButton.disabled = true;
+    attendancePanel.setAttribute('aria-busy', 'true');
+    try {
+        const response = await fetch('/api/admin/attendance-summary', { cache:'no-store' });
+        if (!response.ok) throw new Error('Summary request failed');
+        const summary = await response.json();
+        const total = Number(summary.totalTeachers) || 0;
+        const present = Number(summary.presentCount) || 0;
+        const absent = Number(summary.absentCount) || 0;
+        const rate = total ? Math.round((present / total) * 100) : 0;
+        const [year, month, day] = summary.date.split('-').map(Number);
+        setText('attendanceSummaryDate', new Date(year, month - 1, day).toLocaleDateString('en-US', {
+            weekday:'long', month:'short', day:'numeric', year:'numeric'
+        }));
+        setText('totalTeacherCount', total);
+        setText('presentCount', present);
+        setText('attendanceRate', `${rate}%`);
+        setText('donutRate', `${rate}%`);
+        setText('legendPresent', present);
+        setText('legendAbsent', absent);
+        document.getElementById('attendanceDonut').style.setProperty('--attendance-angle', `${rate * 3.6}deg`);
+        renderRecentAttendance(summary.recentCheckins || []);
+    } catch (error) {
+        setText('attendanceSummaryDate', 'Attendance summary unavailable. Refresh to retry.');
+        ['totalTeacherCount', 'presentCount', 'attendanceRate', 'donutRate', 'legendPresent', 'legendAbsent'].forEach(id => setText(id, '--'));
+        setEmptyRow(attendanceRows, 'Unable to load attendance records.', 4);
+    } finally {
+        attendancePanel.setAttribute('aria-busy', 'false');
+        refreshButton.disabled = false;
+    }
+}
+
+async function loadAttendanceHistory() {
+    try {
+        const month = `${calendarMonth.getFullYear()}-${String(calendarMonth.getMonth() + 1).padStart(2, '0')}`;
+        const response = await fetch(`/api/admin/dashboard-attendance?month=${month}`, { cache:'no-store' });
+        if (!response.ok) throw new Error('Attendance history request failed');
+        const rows = await response.json();
+        attendanceHistory = Array.isArray(rows) ? rows : [];
+        attendanceRecordsByDate.clear();
+        attendanceHistory.forEach(row => {
+            if (!row.check_in || !row.attendance_date) return;
+            const records = attendanceRecordsByDate.get(row.attendance_date) || [];
+            records.push(row);
+            attendanceRecordsByDate.set(row.attendance_date, records);
+        });
+        renderAttendanceTrend();
+        renderCalendar();
+    } catch (error) {
+        setText('trendFootnote', 'Attendance history unavailable.');
+        renderCalendar();
+    }
+}
+
+async function loadRecentActivity() {
+    try {
+        const response = await fetch('/api/admin/recent-activity', { cache:'no-store' });
+        if (!response.ok) throw new Error('Recent activity request failed');
+        const records = await response.json();
+        recentAttendanceActivity = Array.isArray(records) ? records : [];
+        renderActivity();
+    } catch (error) {
+        activityList.replaceChildren();
+        const empty = document.createElement('div');
+        empty.className = 'empty-row';
+        empty.textContent = 'Unable to load recent activity. Refresh to retry.';
+        activityList.append(empty);
+    }
+}
+
+async function loadTeacherMessages() {
+    const refreshButton = document.getElementById('refreshMessages');
+    refreshButton.disabled = true;
+    try {
+        const response = await fetch('/messages/teacher', { cache:'no-store' });
+        if (!response.ok) throw new Error('Messages request failed');
+        const messages = await response.json();
+        teacherMessagesData = Array.isArray(messages) ? messages : [];
+        updateTeacherMessageBadges();
+        renderMessages(teacherMessagesData);
+        renderActivity();
+    } catch (error) {
+        teacherMessages.replaceChildren();
+        const empty = document.createElement('div');
+        empty.className = 'empty-row';
+        empty.textContent = 'Unable to load teacher messages. Refresh to retry.';
+        teacherMessages.append(empty);
+        setText('messageSummary', 'Unable to load messages');
+        setText('teacherMessageCount', '--');
+        const badge = document.getElementById('messageBadge');
+        badge.textContent = '0';
+        badge.style.display = 'none';
+    } finally {
+        refreshButton.disabled = false;
+    }
+}
+
+async function checkSuperAdminAccess() {
+    try {
+        const response = await fetch('/api/session', { cache:'no-store' });
+        if (!response.ok) return false;
+        const session = await response.json();
+        return session.role === 'super_admin';
+    } catch (error) {
+        return false;
+    }
+}
+
+async function loadAdminNotifications() {
+    try {
+        const [response, canDelete] = await Promise.all([
+            fetch('/messages/notification', { cache:'no-store' }),
+            checkSuperAdminAccess()
+        ]);
+        if (!response.ok) throw new Error('Notifications request failed');
+        document.querySelectorAll('[data-role-link="super_admin"]').forEach(link => {
+            link.hidden = !canDelete;
+        });
+        const notifications = await response.json();
+        const unreadCount = notifications.filter(notification => !notification.is_read).length;
+        const badge = document.getElementById('adminNotifyBadge');
+        badge.textContent = unreadCount;
+        badge.style.display = unreadCount ? 'inline-flex' : 'none';
+        notificationList.replaceChildren();
+        if (!notifications.length) {
+            const empty = document.createElement('p');
+            empty.className = 'empty-row';
+            empty.textContent = 'No notifications.';
+            notificationList.append(empty);
+            return;
+        }
+
+        notifications.slice(0, 8).forEach(notification => {
+            const item = document.createElement('article');
+            item.className = 'notification-item';
+            const sender = document.createElement('strong');
+            sender.textContent = notification.sender_name || 'System';
+            const createdAt = document.createElement('small');
+            createdAt.textContent = new Date(notification.created_at).toLocaleString();
+            const message = document.createElement('p');
+            message.className = 'message-body';
+            message.textContent = notification.message || '';
+            item.append(sender, createdAt, message);
+            if (canDelete) {
+                const deleteButton = document.createElement('button');
+                deleteButton.type = 'button';
+                deleteButton.className = 'delete-btn';
+                deleteButton.textContent = 'Delete';
+                deleteButton.addEventListener('click', async () => {
+                    if (!confirm('Delete this notification?')) return;
+                    deleteButton.disabled = true;
+                    try {
+                        const result = await fetch(`/messages/notification/${Number(notification.id)}`, { method:'DELETE' });
+                        const payload = await result.json();
+                        if (!result.ok || payload.status !== 'success') throw new Error(payload.message || 'Unable to delete notification.');
+                        await loadAdminNotifications();
+                    } catch (error) {
+                        alert(error.message || 'Unable to delete notification.');
+                        deleteButton.disabled = false;
+                    }
+                });
+                item.append(deleteButton);
+            }
+            notificationList.append(item);
+        });
+    } catch (error) {
+        notificationList.replaceChildren();
+        const message = document.createElement('p');
+        message.className = 'empty-row';
+        message.textContent = 'Unable to load notifications.';
+        notificationList.append(message);
+    }
+}
+
+async function markAdminNotificationsRead() {
+    const response = await fetch('/messages/notification/read', { method:'PATCH' });
+    const result = await response.json();
+    if (!response.ok || result.status !== 'success') {
+        throw new Error(result.message || 'Unable to mark notifications as read.');
+    }
+}
+
+document.getElementById('calendarPrev').addEventListener('click', () => {
+    calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1);
+    renderCalendar();
+    loadAttendanceHistory();
+});
+document.getElementById('calendarNext').addEventListener('click', () => {
+    calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1);
+    renderCalendar();
+    loadAttendanceHistory();
+});
+document.getElementById('refreshActivity').addEventListener('click', async event => {
+    event.currentTarget.disabled = true;
+    await Promise.all([loadRecentActivity(), loadTeacherMessages()]);
+    event.currentTarget.disabled = false;
+});
+document.getElementById('refreshAttendanceSummary').addEventListener('click', loadAttendanceSummary);
+document.getElementById('refreshMessages').addEventListener('click', loadTeacherMessages);
+document.querySelectorAll('[data-message-filter]').forEach(button => {
+    button.addEventListener('click', () => setTeacherMessageFilter(button.dataset.messageFilter));
+});
+document.getElementById('adminNotifyBtn').addEventListener('click', async () => {
+    notificationDropdown.hidden = !notificationDropdown.hidden;
+    if (!notificationDropdown.hidden) {
+        try {
+            await markAdminNotificationsRead();
+        } catch (error) {
+            alert(error.message || 'Unable to mark notifications as read.');
+        }
+        await loadAdminNotifications();
+    }
+});
+document.getElementById('closeNotifications').addEventListener('click', () => {
+    notificationDropdown.hidden = true;
+});
+document.addEventListener('click', event => {
+    if (!notificationDropdown.hidden && !notificationDropdown.contains(event.target) && !event.target.closest('#adminNotifyBtn')) {
+        notificationDropdown.hidden = true;
+    }
+});
+
+renderCalendar();
+showProgress();
+Promise.all([loadAttendanceSummary(), loadAttendanceHistory(), loadRecentActivity(), loadTeacherMessages(), loadAdminNotifications()]).finally(hideProgress);
+setInterval(() => {
+    const now = new Date();
+    const previousDate = dateKey(today);
+    const previousMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+    const displayedMonth = `${calendarMonth.getFullYear()}-${String(calendarMonth.getMonth() + 1).padStart(2, '0')}`;
+    const currentDate = dateKey(now);
+    today = now;
+    if (currentDate !== previousDate) {
+        document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', {
+            weekday:'long', year:'numeric', month:'long', day:'numeric'
+        });
+        document.getElementById('year').textContent = now.getFullYear();
+        if (displayedMonth === previousMonth) {
+            calendarMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+            selectedCalendarDate = currentDate;
+        }
+        renderCalendar();
+    }
+    loadAttendanceSummary();
+    loadAttendanceHistory();
+    loadRecentActivity();
+    loadTeacherMessages();
+}, 60000);
+</script>
+
+<script src="assets/theme.js"></script>
+</body>
+</html>

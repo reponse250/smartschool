@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SmartSchool | Secure Access</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/theme.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-gradient: linear-gradient(135deg, #eef6ff 0%, #e2e8f0 100%);
+            --text-dark: #0f172a;
+            --text-muted: #475569;
+            --panel: rgba(255,255,255,0.88);
+            --line: rgba(148,163,184,0.22);
+            --error: #ef4444;
+            --success: #10b981;
+            --shadow: 0 30px 70px rgba(15,23,42,0.14);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+        body {
+            background:
+                radial-gradient(circle at top left, rgba(37,99,235,0.15), transparent 18%),
+                radial-gradient(circle at bottom right, rgba(14,165,233,0.10), transparent 25%),
+                var(--bg-gradient);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+        }
+
+        .login-container {
+            position: relative;
+            background: var(--panel);
+            width: 100%;
+            max-width: 440px;
+            padding: 42px 36px 32px;
+            border-radius: 30px;
+            border: 1px solid var(--line);
+            box-shadow: var(--shadow);
+            text-align: center;
+            backdrop-filter: blur(12px);
+        }
+
+        .brand-icon {
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(135deg, rgba(37,99,235,0.14), rgba(14,165,233,0.14));
+            color: var(--primary);
+            border: 1px solid rgba(37,99,235,0.12);
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 30px;
+            margin: 0 auto 24px;
+            box-shadow: 0 18px 36px rgba(37,99,235,0.12);
+        }
+
+        .header h2 { font-size: 32px; font-weight: 800; color: var(--text-dark); letter-spacing: -0.06em; }
+        .header p { color: var(--text-muted); margin-top: 8px; font-size: 15px; margin-bottom: 28px; line-height: 1.6; }
+
+        .form-group { position: relative; margin-bottom: 20px; text-align: left; }
+        .form-group label { display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
+
+        input {
+            width: 100%;
+            padding: 15px 16px;
+            border-radius: 14px;
+            border: 1.5px solid var(--line);
+            font-size: 15px;
+            transition: 0.2s ease;
+            background: rgba(248,250,252,0.9);
+            color: var(--text-dark);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(37,99,235,0.12);
+            background: #fff;
+        }
+
+        .forgot-link {
+            display: block;
+            text-align: right;
+            font-size: 13px;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 700;
+            margin-top: -8px;
+            margin-bottom: 22px;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 15px 18px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+            color: #fff;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 16px 28px rgba(37,99,235,0.18);
+        }
+
+        .login-btn:hover { background: linear-gradient(135deg, var(--primary-hover) 0%, var(--primary) 100%); transform: translateY(-1px); }
+        .login-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(37,99,235,0.12);
+            z-index: 1001;
+            display: none;
+        }
+
+        .progress-bar span {
+            display: block;
+            width: 0;
+            height: 100%;
+            background: linear-gradient(90deg, #2563eb, #1e40af);
+            transition: width 0.25s ease;
+        }
+
+        #message {
+            margin-top: 22px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            display: none;
+            animation: slideIn 0.3s ease-out;
+            border: 1px solid transparent;
+        }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .footer-note { margin-top: 28px; font-size: 12px; color: var(--text-muted); }
+    </style>
+</head>
+<body>
+<div id="topProgress" class="progress-bar"><span></span></div>
+<div class="login-container">
+    <div class="brand-icon">
+        <i class="fa-solid fa-graduation-cap"></i>
+    </div>
+    
+    <div class="header">
+        <h2>Welcome Back</h2>
+        <p>Access the SmartSchool Management Terminal</p>
+    </div>
+
+    <form id="loginForm">
+        <div class="form-group">
+            <label>USERNAME</label>
+            <input type="text" id="username" placeholder="Enter your username" required>
+        </div>
+        
+        <div class="form-group">
+            <label>PASSWORD</label>
+            <input type="password" id="password" placeholder="••••••••" required>
+        </div>
+
+        <a href="javascript:void(0)" class="forgot-link" onclick="handleForgot()">Forgot Password?</a>
+
+        <button type="submit" id="loginBtn" class="login-btn">Sign In</button>
+    </form>
+
+    <div id="message"></div>
+
+    <div class="footer-note">
+        &copy; 2026 SmartSchool. Integrated Security System.
+    </div>
+</div>
+
+<script>
+    const form = document.getElementById('loginForm');
+    const msg = document.getElementById('message');
+    const btn = document.getElementById('loginBtn');
+
+    function handleForgot() {
+        const username = document.getElementById('username').value.trim();
+        const note = prompt('Optional note to the Super Admin (reason for reset):');
+        // send forgot-password notification to backend
+        fetch('/messages/forgot-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, note })
+        }).then(async res => {
+            const data = await res.json().catch(()=>({status:'error',message:'Unknown response'}));
+            alert((data && data.message) ? data.message : 'Super admin has been notified.');
+        }).catch(err => {
+            alert('Could not contact server. Please try again later.');
+        });
+    }
+
+    const topProgress = document.getElementById('topProgress');
+    const formEl = document.getElementById('loginForm');
+    const msgEl = document.getElementById('message');
+    const btnEl = document.getElementById('loginBtn');
+
+    function showTopProgress() {
+        topProgress.style.display = 'block';
+        topProgress.firstElementChild.style.width = '20%';
+    }
+
+    function updateTopProgress(value) {
+        topProgress.firstElementChild.style.width = `${value}%`;
+    }
+
+    function hideTopProgress() {
+        topProgress.firstElementChild.style.width = '100%';
+        setTimeout(() => {
+            topProgress.style.display = 'none';
+            topProgress.firstElementChild.style.width = '0';
+        }, 200);
+    }
+
+    async function submitLogin(event) {
+        event.preventDefault();
+        msgEl.style.display = 'none';
+        btnEl.disabled = true;
+        btnEl.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Authenticating...';
+        showTopProgress();
+
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value.trim();
+
+        try {
+            updateTopProgress(40);
+            const res = await fetch('/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ username, password })
+            });
+            updateTopProgress(80);
+
+            const data = await res.json();
+            msgEl.style.display = 'block';
+
+            if (data.status === 'success') {
+                msgEl.style.background = '#d1fae5';
+                msgEl.style.color = '#065f46';
+                msgEl.innerHTML = '<i class="fa-solid fa-circle-check"></i> Authentication successful.';
+                hideTopProgress();
+                setTimeout(() => {
+                    const routes = {
+                        'super_admin': '/super-admin.html',
+                        'admin': '/admin.html',
+                        'teacher': '/attendance.html'
+                    };
+                    window.location.href = routes[data.role] || '/attendance.html';
+                }, 1000);
+                return;
+            }
+
+            btnEl.disabled = false;
+            btnEl.textContent = 'Sign In';
+            msgEl.style.background = '#fee2e2';
+            msgEl.style.color = '#991b1b';
+            msgEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> ' + (data.message || 'Invalid credentials');
+        } catch (err) {
+            btnEl.disabled = false;
+            btnEl.textContent = 'Sign In';
+            msgEl.style.display = 'block';
+            msgEl.style.background = '#fef3c7';
+            msgEl.style.color = '#92400e';
+            msgEl.textContent = 'Network error. Please verify server connection.';
+        } finally {
+            hideTopProgress();
+        }
+    }
+
+    async function handleForgot() {
+        const username = document.getElementById('username').value.trim();
+        const note = prompt('Optional note to the Super Admin (reason for reset):');
+        showTopProgress();
+        updateTopProgress(30);
+
+        try {
+            const res = await fetch('/messages/forgot-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, note })
+            });
+            updateTopProgress(70);
+            const data = await res.json().catch(() => ({ status:'error', message:'Unknown response' }));
+            alert((data && data.message) ? data.message : 'Super admin has been notified.');
+        } catch (err) {
+            alert('Could not contact server. Please try again later.');
+        } finally {
+            hideTopProgress();
+        }
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', submitLogin);
+</script>
+
+<script src="assets/theme.js"></script>
+</body>
+</html>

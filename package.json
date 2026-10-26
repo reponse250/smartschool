@@ -1,0 +1,23 @@
+{
+  "name": "teacher-attendance-system",
+  "version": "1.0.0",
+  "description": "SmartSchool Teacher Attendance Management System",
+  "scripts": {
+    "migrate:mysql-to-mongo": "node backend/migrate_mysql_to_mongo.js"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "connect-mongo": "^5.1.0",
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.1",
+    "express-session": "^1.19.0",
+    "mongodb": "^6.18.0",
+    "openai": "^6.38.0",
+    "pdfkit": "^0.20.2",
+    "socket.io": "^4.8.3"
+  },
+  "devDependencies": {
+    "mysql2": "^3.24.6"
+  }
+}
