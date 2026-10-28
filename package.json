@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "SmartSchool Teacher Attendance Management System",
   "scripts": {
+    "start": "node realtime/server.js",
     "migrate:mysql-to-mongo": "node backend/migrate_mysql_to_mongo.js"
   },
   "dependencies": {
