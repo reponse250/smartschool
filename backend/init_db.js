@@ -6,12 +6,19 @@ const bcrypt = require('bcrypt');
 async function createAdmin() {
     try {
         const password = process.env.ADMIN_PASSWORD;
-        if (typeof password !== 'string' || password.length < 12 ||
-            Buffer.byteLength(password, 'utf8') > 72) {
-            throw new Error('Set ADMIN_PASSWORD to a value between 12 characters and 72 UTF-8 bytes.');
+        const allowWeakPassword = process.env.ALLOW_WEAK_ADMIN_PASSWORD === 'true';
+        if (typeof password !== 'string' || password.length === 0 ||
+            Buffer.byteLength(password, 'utf8') > 72 ||
+            (password.length < 12 && !allowWeakPassword)) {
+            throw new Error(
+                'Set ADMIN_PASSWORD to 12-72 UTF-8 bytes, or explicitly set ALLOW_WEAK_ADMIN_PASSWORD=true for a shorter password.'
+            );
+        }
+        if (password.length < 12) {
+            console.warn('Warning: bootstrapping a super admin with a password shorter than 12 characters.');
         }
 
-        const username = process.env.ADMIN_USERNAME || 'ELYSE';
+        const username = process.env.ADMIN_USERNAME || 'master';
         const role = 'super_admin';
         const name = process.env.ADMIN_NAME || 'Main Administrator';
 

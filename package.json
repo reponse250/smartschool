@@ -4,6 +4,7 @@
   "description": "SmartSchool Teacher Attendance Management System",
   "scripts": {
     "start": "node realtime/server.js",
+    "create:super-admin": "node backend/init_db.js",
     "migrate:mysql-to-mongo": "node backend/migrate_mysql_to_mongo.js"
   },
   "dependencies": {

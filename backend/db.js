@@ -1,7 +1,7 @@
 
-  const { MongoClient } = require('mongodb');
+  const { MongoClient } = require("mongodb");
 
-  const mongoUrl = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017';
+  const mongoUrl = process.env.MONGODB_URI || 'mongodb+srv://iranezezareponse_db_user:ggssll@cluster0.ljiruuh.mongodb.net/';
   const databaseName = process.env.MONGODB_DB || 'smartschool_db';
   const client = new MongoClient(mongoUrl, { serverSelectionTimeoutMS: 5000 });
   let connection;
