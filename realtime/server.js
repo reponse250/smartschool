@@ -14,6 +14,7 @@ app.get('/health', (req, res) => {
 
 const { Server } = require('socket.io');
 const cors = require('cors');
+const compression = require('compression');
 const path = require('path');
 const crypto = require('crypto');
 
@@ -478,6 +479,53 @@ const reportRateLimiter = createRateLimiter({
 });
 
 // =======================
+// PERFORMANCE
+// =======================
+app.use(compression());
+
+const responseCache = new Map();
+
+async function readCached(key, ttlMs, loader) {
+  const now = Date.now();
+  const cached = responseCache.get(key);
+
+  if (cached && cached.expiresAt > now) {
+    return cached.value;
+  }
+
+  for (const [cacheKey, entry] of responseCache) {
+    if (entry.expiresAt <= now) {
+      responseCache.delete(cacheKey);
+    }
+  }
+
+  const pendingValue = Promise.resolve().then(loader);
+  const entry = {
+    value: pendingValue,
+    expiresAt: now + ttlMs
+  };
+  responseCache.set(key, entry);
+
+  try {
+    const value = await pendingValue;
+    entry.value = value;
+
+    while (responseCache.size > 100) {
+      const oldestKey = responseCache.keys().next().value;
+      if (oldestKey === undefined) break;
+      responseCache.delete(oldestKey);
+    }
+
+    return value;
+  } catch (error) {
+    if (responseCache.get(key) === entry) {
+      responseCache.delete(key);
+    }
+    throw error;
+  }
+}
+
+// =======================
 // ROUTES
 // =======================
 
@@ -542,11 +590,18 @@ app.get(
   requireAdmin,
   async (req, res) => {
     try {
-      res.set('Cache-Control', 'no-store');
-
-      res.json(
-        await getTodayAttendanceSummary()
+      res.set(
+        'Cache-Control',
+        'private, max-age=15, stale-while-revalidate=60'
       );
+
+      const summary = await readCached(
+        'attendance-summary:today',
+        15 * 1000,
+        () => getTodayAttendanceSummary()
+      );
+
+      res.json(summary);
 
     } catch (error) {
       console.error(
@@ -569,11 +624,18 @@ app.get(
   requireAdmin,
   async (req, res) => {
     try {
-      res.set('Cache-Control', 'no-store');
-
-      res.json(
-        await getRecentAttendanceActivity()
+      res.set(
+        'Cache-Control',
+        'private, max-age=15, stale-while-revalidate=60'
       );
+
+      const activity = await readCached(
+        'attendance-activity:7d',
+        15 * 1000,
+        () => getRecentAttendanceActivity()
+      );
+
+      res.json(activity);
 
     } catch (error) {
       console.error(
@@ -612,11 +674,18 @@ app.get(
     }
 
     try {
-      res.set('Cache-Control', 'no-store');
-
-      res.json(
-        await getDashboardAttendance(month)
+      res.set(
+        'Cache-Control',
+        'private, max-age=15, stale-while-revalidate=60'
       );
+
+      const dashboard = await readCached(
+        `dashboard-attendance:${month || 'current-month'}`,
+        15 * 1000,
+        () => getDashboardAttendance(month)
+      );
+
+      res.json(dashboard);
 
     } catch (error) {
       console.error(
@@ -976,6 +1045,8 @@ app.post(
 
           status_time: new Date()
         });
+
+      responseCache.clear();
 
       res.json({
         status: 'success'

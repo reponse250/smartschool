@@ -13,6 +13,10 @@ function formatTime(date) {
     });
 }
 
+function escapeRegex(value) {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 async function buildDailyRows({ month, teacher, teacherId } = {}) {
     const query = {};
     if (month !== undefined) {
@@ -36,14 +40,48 @@ async function buildDailyRows({ month, teacher, teacherId } = {}) {
     }
 
     const database = await db.connect();
+    const teachersCollection = database.collection('teachers');
+    const search = typeof teacher === 'string' ? teacher.trim() : '';
+    let selectedTeachers;
+
+    if (search) {
+        selectedTeachers = await teachersCollection.find({
+            name: { $regex: escapeRegex(search), $options: 'i' }
+        }, {
+            projection: { _id: 0, id: 1, name: 1 }
+        }).toArray();
+        const matchingTeacherIds = selectedTeachers.map((item) => item.id);
+
+        if (
+            !matchingTeacherIds.length ||
+            (
+                selectedTeacherId !== null &&
+                !matchingTeacherIds.includes(selectedTeacherId)
+            )
+        ) {
+            return [];
+        }
+
+        query.teacher_id = selectedTeacherId === null
+            ? { $in: matchingTeacherIds }
+            : selectedTeacherId;
+    }
+
+    const teachersPromise = selectedTeachers
+        ? Promise.resolve(selectedTeachers)
+        : teachersCollection.find(
+            selectedTeacherId === null ? {} : { id: selectedTeacherId },
+            { projection: { _id: 0, id: 1, name: 1 } }
+        ).toArray();
+
     const [teachers, records] = await Promise.all([
-        database.collection('teachers').find({}, { projection: { _id: 0, id: 1, name: 1 } }).toArray(),
+        teachersPromise,
         database.collection('attendance').find(query, {
             projection: { _id: 0, teacher_id: 1, action: 1, status_time: 1 }
         }).toArray()
     ]);
     const teachersById = new Map(teachers.map((item) => [item.id, item]));
-    const search = typeof teacher === 'string' ? teacher.trim().toLocaleLowerCase() : '';
+    const normalizedSearch = search.toLocaleLowerCase();
     const grouped = new Map();
 
     for (const record of records) {
@@ -54,7 +92,7 @@ async function buildDailyRows({ month, teacher, teacherId } = {}) {
         const name = teacherRecord?.name || (teacherId === undefined ? 'Deleted Teacher' : `ID: ${record.teacher_id}`);
 
         if (selectedTeacherId !== null && record.teacher_id !== selectedTeacherId) continue;
-        if (search && !name.toLocaleLowerCase().includes(search)) continue;
+        if (normalizedSearch && !name.toLocaleLowerCase().includes(normalizedSearch)) continue;
 
         const key = `${record.teacher_id}:${attendanceDate}`;
         let row = grouped.get(key);
