@@ -70,33 +70,35 @@ const normalizeOrigin = (value) => {
     return null;
   }
 
-  const trimmed = value.trim();
-
-  if (!trimmed) {
-    return null;
-  }
-
   try {
-    return new URL(trimmed).origin;
-  } catch (error) {
-    return trimmed.replace(/\/$/, '');
+    return new URL(value.trim()).origin;
+  } catch {
+    return null;
   }
 };
 
 const defaultAllowedOrigins = [
   'https://mubuga.netlify.app',
-  'https://www.mubuga.netlify.app'
+  'https://www.mubuga.netlify.app',
+  'https://smartschool-o73k.onrender.com'
 ];
 
 const allowedOrigins = new Set(
   [
-    process.env.PUBLIC_ORIGIN,
     ...defaultAllowedOrigins,
+    process.env.PUBLIC_ORIGIN,
     ...(process.env.CORS_ORIGINS || '').split(',')
   ]
     .map(normalizeOrigin)
     .filter(Boolean)
 );
+
+const isAllowedOrigin = (origin) => {
+  const normalized = normalizeOrigin(origin);
+
+  return normalized !== null &&
+    allowedOrigins.has(normalized);
+};
 
 // =======================
 // SESSION SECRET
@@ -161,18 +163,45 @@ app.use((req, res, next) => {
   next();
 });
 
-// CORS
+// =======================
+// CORS MIDDLEWARE
+// =======================
 app.use(cors({
   origin(origin, callback) {
-    callback(
-      null,
-      Boolean(origin && allowedOrigins.has(origin))
-    );
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    if (isAllowedOrigin(origin)) {
+      return callback(null, true);
+    }
+
+    console.warn('Blocked CORS origin:', origin);
+
+    return callback(null, false);
   },
-  credentials: true
+
+  credentials: true,
+
+  methods: [
+    'GET',
+    'POST',
+    'PUT',
+    'PATCH',
+    'DELETE',
+    'OPTIONS'
+  ],
+
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-Requested-With'
+  ]
 }));
 
-// Origin protection
+// =======================
+// ORIGIN PROTECTION
+// =======================
 app.use((req, res, next) => {
   if (
     ['GET', 'HEAD', 'OPTIONS'].includes(req.method) ||
@@ -186,19 +215,30 @@ app.use((req, res, next) => {
   let sameOrigin = false;
 
   try {
+    const forwardedProtocol =
+      req.get('x-forwarded-proto') || req.protocol;
+
+    const protocol = forwardedProtocol
+      .split(',')[0]
+      .trim();
+
+    const requestOrigin = normalizeOrigin(
+      `${protocol}://${req.get('Host')}`
+    );
+
     sameOrigin =
-      new URL(origin).origin ===
-      new URL(
-        `${req.protocol}://${req.get('Host')}`
-      ).origin;
+      normalizeOrigin(origin) === requestOrigin;
+
   } catch (error) {
     sameOrigin = false;
   }
 
-  if (
-    !sameOrigin &&
-    !allowedOrigins.has(origin)
-  ) {
+  if (!sameOrigin && !isAllowedOrigin(origin)) {
+    console.warn(
+      'Blocked untrusted request origin:',
+      origin
+    );
+
     return res.status(403).json({
       status: 'error',
       message: 'Untrusted request origin'
@@ -242,7 +282,9 @@ const sessionMiddleware = session({
   cookie: {
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000,
-    sameSite: 'lax',
+    sameSite: process.env.NODE_ENV === 'production'
+      ? 'none'
+      : 'lax',
     secure: process.env.NODE_ENV === 'production'
   }
 });
@@ -1018,13 +1060,10 @@ const io = new Server(http, {
 
   cors: {
     origin(origin, callback) {
-      callback(
-        null,
-        Boolean(origin && allowedOrigins.has(origin))
-      );
+      callback(null, !origin || isAllowedOrigin(origin));
     },
-
-    credentials: true
+    credentials: true,
+    methods: ['GET', 'POST']
   },
 
   allowRequest(req, callback) {
@@ -1033,7 +1072,7 @@ const io = new Server(http, {
 
     if (
       !origin ||
-      allowedOrigins.has(origin)
+      isAllowedOrigin(origin)
     ) {
       return callback(null, true);
     }
