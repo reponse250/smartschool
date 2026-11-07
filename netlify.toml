@@ -1,0 +1,111 @@
+[build]
+  publish = "public"
+  command = ""
+
+[[redirects]]
+  from = "/login"
+  to = "https://smartschool-o73k.onrender.com/login"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/logout"
+  to = "https://smartschool-o73k.onrender.com/logout"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/save-attendance"
+  to = "https://smartschool-o73k.onrender.com/save-attendance"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/ask-ai"
+  to = "https://smartschool-o73k.onrender.com/ask-ai"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/teacher-record"
+  to = "https://smartschool-o73k.onrender.com/teacher-record"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/admin-interface/*"
+  to = "https://smartschool-o73k.onrender.com/admin-interface/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/*"
+  to = "https://smartschool-o73k.onrender.com/api/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/messages/*"
+  to = "https://smartschool-o73k.onrender.com/messages/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/teachers"
+  to = "https://smartschool-o73k.onrender.com/teachers"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/teachers/*"
+  to = "https://smartschool-o73k.onrender.com/teachers/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/users"
+  to = "https://smartschool-o73k.onrender.com/users"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/users/*"
+  to = "https://smartschool-o73k.onrender.com/users/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/attendance-report"
+  to = "https://smartschool-o73k.onrender.com/attendance-report"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/attendance-report/*"
+  to = "https://smartschool-o73k.onrender.com/attendance-report/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/monthly-report"
+  to = "https://smartschool-o73k.onrender.com/monthly-report"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/monthly-report/*"
+  to = "https://smartschool-o73k.onrender.com/monthly-report/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/export-pdf"
+  to = "https://smartschool-o73k.onrender.com/export-pdf"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/export-pdf/*"
+  to = "https://smartschool-o73k.onrender.com/export-pdf/:splat"
+  status = 200
+  force = true
