@@ -106,7 +106,7 @@
             bar.style.width = value + '%';
         }, 120);
 
-        fetch('/logout', { method: 'GET' })
+        fetch('/logout', { method: 'POST' })
             .then(() => {
                 bar.style.width = '100%';
                 setTimeout(() => window.location.href = 'index.html', 250);
@@ -119,5 +119,4 @@
 <script src="assets/theme.js"></script>
 </body>
 </html>
-
 

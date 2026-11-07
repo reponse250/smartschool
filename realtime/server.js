@@ -36,6 +36,8 @@ const attendanceReport = require('../backend/attendanceReport');
 const monthlyReport = require('../backend/monthlyReport');
 const userManagement = require('../backend/createUser');
 const messageRouter = require('../backend/messages');
+const adminInterfaceRouter = require('../backend/adminInterface');
+const teacherRecordRouter = require('../backend/teacherRecord');
 
 const {
   getDashboardAttendance,
@@ -63,13 +65,37 @@ const dummyPasswordHash = bcrypt.hash(
 // =======================
 // CORS CONFIGURATION
 // =======================
+const normalizeOrigin = (value) => {
+  if (!value || typeof value !== 'string') {
+    return null;
+  }
+
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return null;
+  }
+
+  try {
+    return new URL(trimmed).origin;
+  } catch (error) {
+    return trimmed.replace(/\/$/, '');
+  }
+};
+
+const defaultAllowedOrigins = [
+  'https://mubuga.netlify.app',
+  'https://www.mubuga.netlify.app'
+];
+
 const allowedOrigins = new Set(
   [
     process.env.PUBLIC_ORIGIN,
+    ...defaultAllowedOrigins,
     ...(process.env.CORS_ORIGINS || '').split(',')
   ]
+    .map(normalizeOrigin)
     .filter(Boolean)
-    .map(origin => origin.trim())
 );
 
 // =======================
@@ -458,6 +484,10 @@ app.use(
   reportRateLimiter,
   monthlyReport
 );
+
+// Admin interface and teacher record APIs
+app.use('/admin-interface', adminInterfaceRouter);
+app.use('/teacher-record', teacherRecordRouter);
 
 // =======================
 // ADMIN DASHBOARD APIs

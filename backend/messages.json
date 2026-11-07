@@ -68,59 +68,5 @@
       "1",
       "2"
     ]
-  },
-  {
-    "id": 1792677965277,
-    "type": "teacher",
-    "sender_id": 2,
-    "sender_name": "iranezeza reponse",
-    "sender_role": "teacher",
-    "subject": "",
-    "message": "heloo to day",
-    "status": "reviewed",
-    "created_at": "2026-10-22T14:06:04.435Z",
-    "reviewed_at": "2026-10-23T12:11:43.811Z",
-    "reviewed_by": 3,
-    "reviewed_by_name": "niyibizi emanuel",
-    "read_by": [
-      "3",
-      "1",
-      "2"
-    ],
-    "replies": [
-      {
-        "id": 1792757504353,
-        "sender_id": 3,
-        "sender_name": "niyibizi emanuel",
-        "sender_role": "admin",
-        "message": "heloo2",
-        "created_at": "2026-10-23T12:11:43.811Z",
-        "read_by": [
-          "3",
-          "1",
-          "2"
-        ]
-      }
-    ]
-  },
-  {
-    "id": 1792516736156,
-    "type": "teacher",
-    "sender_id": 2,
-    "sender_name": "iranezeza reponse",
-    "sender_role": "teacher",
-    "subject": "",
-    "message": "hiii",
-    "status": "reviewed",
-    "created_at": "2026-10-20T17:18:55.452Z",
-    "reviewed_at": "2026-10-22T08:09:07.993Z",
-    "reviewed_by": 1,
-    "reviewed_by_name": "ELYSE",
-    "read_by": [
-      "3",
-      "1",
-      "2"
-    ],
-    "replies": []
   }
 ]
