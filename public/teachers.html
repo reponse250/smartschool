@@ -200,6 +200,25 @@ tr:hover { background-color: #f3f4f6; transition:0.2s; }
         box-shadow: 0 8px 20px rgba(15,23,42,0.05);
     }
 
+    :root[data-theme='dark'] .back-btn {
+        background: #202f39;
+        color: #e7edf0;
+        border-color: #465761;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.24);
+    }
+
+    :root[data-theme='dark'] .back-btn:hover {
+        background: #2563eb;
+        color: #fff;
+        border-color: #3b82f6;
+        box-shadow: 0 10px 24px rgba(37,99,235,0.3);
+    }
+
+    .back-btn:focus-visible {
+        outline: 3px solid #67b8bd;
+        outline-offset: 3px;
+    }
+
     .action-bar {
         background: rgba(255,255,255,0.82);
         border: 1px solid var(--border);
