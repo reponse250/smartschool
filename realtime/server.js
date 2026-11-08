@@ -134,11 +134,13 @@ if (!hasStrongSessionSecret) {
 // =======================
 app.disable('x-powered-by');
 
-// Trust Render proxy when configured
+// Trust the hosting proxy so secure session cookies work behind TLS termination.
 if (process.env.TRUST_PROXY === 'true') {
   app.set('trust proxy', 1);
 } else if (process.env.TRUST_PROXY) {
   app.set('trust proxy', process.env.TRUST_PROXY);
+} else if (process.env.NODE_ENV === 'production' || process.env.RENDER === 'true') {
+  app.set('trust proxy', 1);
 }
 
 // Security headers
