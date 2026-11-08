@@ -154,7 +154,7 @@
 
     async function loadTeachers() {
         try {
-            const res = await fetch('/teachers', { headers: { Accept: 'application/json' } });
+            const res = await fetch('/api/teachers', { headers: { Accept: 'application/json' } });
             if (!res.ok) throw new Error('Unable to load the teacher list.');
             const teachers = await res.json();
             teachers.forEach(t => {

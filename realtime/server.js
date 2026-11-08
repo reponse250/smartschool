@@ -568,6 +568,12 @@ app.use(
   teacherRouter
 );
 
+app.use(
+  '/api/teachers',
+  requireLogin,
+  teacherRouter
+);
+
 // Messages
 app.use(
   '/messages',

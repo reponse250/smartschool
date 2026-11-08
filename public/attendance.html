@@ -420,7 +420,7 @@ async function loadTeachers(){
     select.innerHTML='<option value="">Loading teacher list...</option>';
 
     try{
-        const res=await fetch('/teachers');
+        const res=await fetch('/api/teachers', { headers: { Accept: 'application/json' } });
         const data=await res.json();
 
         select.innerHTML='<option value="">Select Teacher</option>';
