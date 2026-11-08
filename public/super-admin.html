@@ -1119,9 +1119,13 @@
                     headers: { 'Accept': 'application/json' }
                 });
 
-                if (response.status === 401 || response.status === 403) {
+                if (response.status === 401) {
                     window.location.href = '/';
                     return [];
+                }
+
+                if (response.status === 403) {
+                    throw new Error('Super Admin access is required to load this directory.');
                 }
 
                 if (!response.ok) throw new Error('Request failed: ' + url);
@@ -1191,7 +1195,16 @@
             } else {
                 totalUsersStat.textContent = '--';
                 administratorsStat.textContent = '--';
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: #ef4444;">Failed to connect to server.</td></tr>';
+                const errorRow = document.createElement('tr');
+                const errorCell = document.createElement('td');
+                errorCell.colSpan = 4;
+                errorCell.style.textAlign = 'center';
+                errorCell.style.color = '#ef4444';
+                errorCell.textContent = usersResult.reason instanceof Error
+                    ? usersResult.reason.message
+                    : 'Failed to connect to server.';
+                errorRow.append(errorCell);
+                tbody.replaceChildren(errorRow);
             }
 
             if (teachersResult.status === 'fulfilled') {
