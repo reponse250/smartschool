@@ -1131,7 +1131,7 @@
             };
             const [usersResult, teachersResult] = await Promise.allSettled([
                 loadCollection('/users'),
-                loadCollection('/teachers')
+                loadCollection('/api/admin/teachers')
             ]);
 
             if (usersResult.status === 'fulfilled') {

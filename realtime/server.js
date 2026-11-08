@@ -605,6 +605,29 @@ app.use('/teacher-record', teacherRecordRouter);
 // ADMIN DASHBOARD APIs
 // =======================
 
+app.get(
+  '/api/admin/teachers',
+  requireLogin,
+  requireAdmin,
+  async (req, res) => {
+    try {
+      const database = await db.connect();
+      const teachers = await database.collection('teachers')
+        .find({}, { projection: { _id: 0, id: 1, name: 1 } })
+        .sort({ id: -1 })
+        .toArray();
+
+      res.json(teachers);
+    } catch (error) {
+      console.error('Admin teachers list error:', error);
+      res.status(500).json({
+        status: 'error',
+        message: 'Unable to load teachers'
+      });
+    }
+  }
+);
+
 // Attendance summary
 app.get(
   '/api/admin/attendance-summary',
