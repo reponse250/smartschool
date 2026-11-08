@@ -301,17 +301,23 @@ const normalizeRole = (role) => {
     : role;
 };
 
-// Require login
+const isJsonApiRequest = (req) => {
+  const accept = req.headers.accept || '';
+  const fetchMode = req.headers['sec-fetch-mode'];
+  const fetchDest = req.headers['sec-fetch-dest'];
+
+  return Boolean(
+    req.xhr ||
+    accept.includes('json') ||
+    accept.includes('+json') ||
+    (fetchMode && fetchMode !== 'navigate') ||
+    (fetchDest && fetchDest !== 'document')
+  );
+};
+
 const requireLogin = (req, res, next) => {
   if (!req.session || !req.session.user) {
-
-    if (
-      req.xhr ||
-      (
-        req.headers.accept &&
-        req.headers.accept.indexOf('json') > -1
-      )
-    ) {
+    if (isJsonApiRequest(req)) {
       return res.status(401).json({
         status: 'error',
         message: 'Not logged in'
@@ -334,10 +340,18 @@ const requireSuperAdmin = (req, res, next) => {
     req.session?.user?.role
   );
 
-  if (
-    !req.session.user ||
-    role !== 'super_admin'
-  ) {
+  if (!req.session?.user) {
+    if (isJsonApiRequest(req)) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Not logged in'
+      });
+    }
+
+    return res.redirect('/');
+  }
+
+  if (role !== 'super_admin') {
     return res.status(403).json({
       status: 'error',
       message: 'Access denied: Super Admin only'
@@ -353,10 +367,18 @@ const requireAdmin = (req, res, next) => {
     req.session?.user?.role
   );
 
-  if (
-    !req.session.user ||
-    !['admin', 'super_admin'].includes(role)
-  ) {
+  if (!req.session?.user) {
+    if (isJsonApiRequest(req)) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Not logged in'
+      });
+    }
+
+    return res.redirect('/');
+  }
+
+  if (!['admin', 'super_admin'].includes(role)) {
     return res.status(403).json({
       status: 'error',
       message: 'Access denied: Admin only'
