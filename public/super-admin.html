@@ -480,6 +480,13 @@
             padding: 8px 10px;
         }
 
+        .notification-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
         .notification-item strong {
             display: flex;
             align-items: center;
@@ -1106,6 +1113,46 @@
             setTheme(savedTheme || preferredTheme, Boolean(savedTheme));
         }
 
+        async function deleteNotification(notification) {
+            const id = Number(notification.id);
+            if (!Number.isInteger(id) || id < 1) {
+                throw new Error('Invalid notification ID.');
+            }
+
+            if (!confirm('Delete this notification from ' + (notification.sender_name || 'System') + '?')) {
+                return;
+            }
+
+            const response = await fetch('/messages/notification/' + id, {
+                method: 'DELETE',
+                credentials: 'include',
+                headers: { 'Accept': 'application/json' }
+            });
+            const result = await response.json();
+            if (!response.ok || result.status !== 'success') {
+                throw new Error(result.message || 'Unable to delete notification.');
+            }
+
+            await loadNotifications();
+        }
+
+        function createNotificationDeleteButton(notification) {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'btn-mini delete';
+            button.title = 'Delete notification';
+            button.setAttribute('aria-label', 'Delete notification from ' + (notification.sender_name || 'System'));
+            button.innerHTML = '<i class="fa-solid fa-trash"></i>';
+            button.addEventListener('click', async function () {
+                try {
+                    await deleteNotification(notification);
+                } catch (error) {
+                    alert(error.message || 'Unable to delete notification.');
+                }
+            });
+            return button;
+        }
+
         async function loadUsers() {
             const tbody = document.getElementById('userTableBody');
             const totalUsersStat = document.getElementById('totalUsersStat');
@@ -1297,13 +1344,16 @@
                     data.slice(0, 6).forEach(function (notification) {
                         const item = document.createElement('div');
                         item.className = 'notification-item';
+                        const heading = document.createElement('div');
+                        heading.className = 'notification-heading';
                         const sender = document.createElement('strong');
                         sender.textContent = notification.sender_name || 'System';
+                        heading.append(sender, createNotificationDeleteButton(notification));
                         const message = document.createElement('small');
                         message.textContent = notification.message || '';
                         const createdAt = document.createElement('small');
                         createdAt.textContent = new Date(notification.created_at).toLocaleString();
-                        item.append(sender, message, createdAt);
+                        item.append(heading, message, createdAt);
                         items.append(item);
                     });
                     notificationList.replaceChildren(items);
@@ -1332,26 +1382,7 @@
                             heading.style.cssText = 'display:flex; justify-content:space-between; gap:10px; align-items:center;';
                             const sender = document.createElement('strong');
                             sender.textContent = notification.sender_name || 'System';
-                            const deleteButton = document.createElement('button');
-                            deleteButton.type = 'button';
-                            deleteButton.className = 'btn-mini delete';
-                            deleteButton.style.cssText = 'padding:5px 8px; font-size:11px;';
-                            deleteButton.textContent = 'Delete';
-                            deleteButton.addEventListener('click', async function () {
-                                const id = Number(notification.id);
-                                if (!Number.isInteger(id) || id < 1 || !confirm('Delete this notification?')) return;
-                                try {
-                                    const response = await fetch('/messages/notification/' + id, { method: 'DELETE' });
-                                    const result = await response.json();
-                                    if (!response.ok || result.status !== 'success') {
-                                        throw new Error(result.message || 'Unable to delete notification.');
-                                    }
-                                    await loadNotifications();
-                                } catch (error) {
-                                    alert(error.message || 'Unable to delete notification.');
-                                }
-                            });
-                            heading.append(sender, deleteButton);
+                            heading.append(sender, createNotificationDeleteButton(notification));
 
                             const createdAt = document.createElement('small');
                             createdAt.style.cssText = 'color:var(--text-muted); display:block; margin-top:4px;';

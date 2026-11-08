@@ -371,7 +371,9 @@ router.delete('/notification/:id', async (req, res) => {
 
   try {
     const messages = await loadMessages();
-    const updatedMessages = messages.filter(message => message.id !== notificationId);
+    const updatedMessages = messages.filter(message =>
+      !(message.id === notificationId && message.type === 'notification')
+    );
 
     if (updatedMessages.length === messages.length) {
       return res.status(404).json({ status: 'error', message: 'Notification not found.' });
