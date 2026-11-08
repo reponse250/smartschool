@@ -637,9 +637,24 @@ document.getElementById('logoutBtn').addEventListener('click', async (event) => 
     const button = event.currentTarget;
     button.disabled = true;
     try {
-        await fetch('/logout', { method: 'POST' });
-    } finally {
-        window.location.assign('/');
+        const response = await fetch('/api/logout', {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: '{}'
+        });
+        const result = await response.json();
+        if (!response.ok || result.status !== 'success') {
+            throw new Error(result.message || 'Logout request failed.');
+        }
+        window.location.replace('/');
+    } catch (error) {
+        console.error('Unable to sign out:', error);
+        alert('Unable to sign out. Please try again.');
+        button.disabled = false;
     }
 });
 

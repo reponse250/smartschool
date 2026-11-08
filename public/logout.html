@@ -106,10 +106,22 @@
             bar.style.width = value + '%';
         }, 120);
 
-        fetch('/logout', { method: 'POST' })
-            .then(() => {
+        fetch('/api/logout', {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: '{}'
+        })
+            .then(async response => {
+                const result = await response.json();
+                if (!response.ok || result.status !== 'success') {
+                    throw new Error(result.message || 'Unable to log out.');
+                }
                 bar.style.width = '100%';
-                setTimeout(() => window.location.href = 'index.html', 250);
+                setTimeout(() => window.location.replace('/'), 250);
             })
             .catch(() => {
                 bar.style.background = '#ef4444';
@@ -119,4 +131,3 @@
 <script src="assets/theme.js"></script>
 </body>
 </html>
-

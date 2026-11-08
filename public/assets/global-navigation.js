@@ -195,9 +195,20 @@
             if (button.dataset.action === 'logout') {
                 button.disabled = true;
                 try {
-                    const response = await fetch('/logout', { method: 'POST' });
-                    if (!response.ok) throw new Error(`Logout request failed (${response.status})`);
-                    window.location.assign('/index.html');
+                    const response = await fetch('/api/logout', {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: {
+                            Accept: 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: '{}'
+                    });
+                    const result = await response.json();
+                    if (!response.ok || result.status !== 'success') {
+                        throw new Error(result.message || `Logout request failed (${response.status})`);
+                    }
+                    window.location.replace('/index.html');
                 } catch (error) {
                     console.error('Unable to sign out:', error);
                     window.alert('Unable to sign out. Please try again.');

@@ -12,7 +12,7 @@
         document.head.appendChild(navigationStyles);
 
         const navigationScript = document.createElement('script');
-        navigationScript.src = '/assets/global-navigation.js?v=20261024-6';
+        navigationScript.src = '/assets/global-navigation.js?v=20261108-1';
         navigationScript.defer = true;
         document.head.appendChild(navigationScript);
     }

@@ -1010,7 +1010,7 @@ app.post(
 // =======================
 // LOGOUT
 // =======================
-app.post('/logout', (req, res) => {
+const handleLogout = (req, res) => {
 
   req.session.destroy((error) => {
 
@@ -1032,7 +1032,9 @@ app.post('/logout', (req, res) => {
       status: 'success'
     });
   });
-});
+};
+
+app.post(['/logout', '/api/logout'], handleLogout);
 
 // =======================
 // ATTENDANCE API
