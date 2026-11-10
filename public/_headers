@@ -1,2 +1,38 @@
-/*
+/
+  X-Robots-Tag: index, follow
+
+/admin-builder.html
+  X-Robots-Tag: noindex, nofollow
+
+/admin.html
+  X-Robots-Tag: noindex, nofollow
+
+/attendance.html
+  X-Robots-Tag: noindex, nofollow
+
+/exportPdf.html
+  X-Robots-Tag: noindex, nofollow
+
+/logout.html
+  X-Robots-Tag: noindex, nofollow
+
+/messages.html
+  X-Robots-Tag: noindex, nofollow
+
+/monthly_report.html
+  X-Robots-Tag: noindex, nofollow
+
+/report.html
+  X-Robots-Tag: noindex, nofollow
+
+/settings.html
+  X-Robots-Tag: noindex, nofollow
+
+/super-admin.html
+  X-Robots-Tag: noindex, nofollow
+
+/teacher_record.html
+  X-Robots-Tag: noindex, nofollow
+
+/teachers.html
   X-Robots-Tag: noindex, nofollow

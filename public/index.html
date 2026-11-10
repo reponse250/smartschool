@@ -2,18 +2,27 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Mubuga TSS | SmartSchool Sign In</title>
+    <title>Mubuga TSS | SmartSchool Staff Sign In</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Secure sign-in for Mubuga TSS staff to access the SmartSchool attendance and school administration system.">
-    <meta name="robots" content="noindex, nofollow">
+    <meta name="description" content="Sign in to Mubuga Technical Secondary School's SmartSchool portal for authorized staff access to attendance and school administration tools.">
+    <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://mubuga.netlify.app/">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Mubuga TSS | SmartSchool Sign In">
-    <meta property="og:description" content="Secure staff access to the Mubuga TSS SmartSchool attendance and school administration system.">
+    <meta property="og:title" content="Mubuga TSS | SmartSchool Staff Sign In">
+    <meta property="og:description" content="Sign in to Mubuga TSS SmartSchool for authorized staff access to attendance and school administration tools.">
     <meta property="og:url" content="https://mubuga.netlify.app/">
     <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="Mubuga TSS | SmartSchool Sign In">
-    <meta name="twitter:description" content="Secure staff access to the Mubuga TSS SmartSchool attendance and school administration system.">
+    <meta name="twitter:title" content="Mubuga TSS | SmartSchool Staff Sign In">
+    <meta name="twitter:description" content="Sign in to Mubuga TSS SmartSchool for authorized staff access to attendance and school administration tools.">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Mubuga TSS SmartSchool",
+      "url": "https://mubuga.netlify.app/",
+      "description": "Staff sign-in portal for Mubuga Technical Secondary School."
+    }
+    </script>
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/theme.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -58,19 +67,52 @@
             backdrop-filter: blur(12px);
         }
 
-        .brand-icon {
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            margin: 0 auto 20px;
+            flex-wrap: wrap;
+        }
+
+        .brand-mark {
             width: 72px;
             height: 72px;
-            background: linear-gradient(135deg, rgba(37,99,235,0.14), rgba(14,165,233,0.14));
-            color: var(--primary);
-            border: 1px solid rgba(37,99,235,0.12);
-            border-radius: 20px;
+            border-radius: 22px;
             display: flex;
-            justify-content: center;
             align-items: center;
-            font-size: 30px;
-            margin: 0 auto 24px;
-            box-shadow: 0 18px 36px rgba(37,99,235,0.12);
+            justify-content: center;
+            color: #fff;
+            font-size: 32px;
+            font-weight: 900;
+            letter-spacing: -0.06em;
+            background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
+            box-shadow: 0 18px 36px rgba(37,99,235,0.18);
+            border: 1px solid rgba(37,99,235,0.12);
+        }
+
+        .brand-text {
+            text-align: left;
+        }
+
+        .brand-name {
+            display: block;
+            font-size: 1.02rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+
+        .brand-subname {
+            display: block;
+            margin-top: 4px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            color: var(--text-muted);
+            text-transform: uppercase;
         }
 
         .header h2 { font-size: 32px; font-weight: 800; color: var(--text-dark); letter-spacing: -0.06em; }
@@ -163,8 +205,12 @@
 <body>
 <div id="topProgress" class="progress-bar"><span></span></div>
 <div class="login-container">
-    <div class="brand-icon">
-        <i class="fa-solid fa-graduation-cap"></i>
+    <div class="brand-logo" aria-label="Mubuga TSS SmartSchool logo">
+        <div class="brand-mark" aria-hidden="true">S</div>
+        <div class="brand-text">
+            <span class="brand-name">Mubuga TSS</span>
+            <span class="brand-subname">SmartSchool</span>
+        </div>
     </div>
     
     <div class="header">
