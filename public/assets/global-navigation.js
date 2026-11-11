@@ -24,7 +24,7 @@
                 { label: 'Monthly Report', href: '/monthly_report.html', icon: '▦' },
                 { label: 'Messages', href: '/messages.html', icon: '✉' },
                 { label: 'Settings', href: '/settings.html', icon: '⚙' },
-                { label: 'Manage Staff', href: '/admin-builder.html', icon: '♧', section: 'Admin tools' },
+                { label: 'Manage Staff', href: '/teachers.html', icon: '♧', section: 'Admin tools' },
                 { label: 'Dark mode', action: 'theme', icon: '◐', section: 'Account' },
                 { label: 'Log out', action: 'logout', icon: '↪' }
             ];
@@ -38,7 +38,7 @@
                 { label: 'Daily Report', href: '/report.html', icon: '▤' },
                 { label: 'Monthly Report', href: '/monthly_report.html', icon: '▦' },
                 { label: 'Messages', href: '/messages.html', icon: '✉' },
-                { label: 'Manage Staff', href: '/admin-builder.html', icon: '♧', section: 'Admin tools' },
+                { label: 'Manage Staff', href: '/teachers.html', icon: '♧', section: 'Admin tools' },
                 { label: 'Dark mode', action: 'theme', icon: '◐', section: 'Account' },
                 { label: 'Log out', action: 'logout', icon: '↪' }
             ];

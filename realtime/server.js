@@ -37,7 +37,6 @@ const attendanceReport = require('../backend/attendanceReport');
 const monthlyReport = require('../backend/monthlyReport');
 const userManagement = require('../backend/createUser');
 const messageRouter = require('../backend/messages');
-const adminInterfaceRouter = require('../backend/adminInterface');
 const teacherRecordRouter = require('../backend/teacherRecord');
 
 const {
@@ -638,8 +637,7 @@ app.use(
   monthlyReport
 );
 
-// Admin interface and teacher record APIs
-app.use('/admin-interface', adminInterfaceRouter);
+// Teacher record APIs
 app.use('/teacher-record', teacherRecordRouter);
 
 // =======================
@@ -917,21 +915,6 @@ app.get(
 
     res.sendFile(
       path.join(publicPath, 'attendance.html')
-    );
-  }
-);
-
-// =======================
-// ADMIN BUILDER
-// =======================
-app.get(
-  '/admin-builder.html',
-  requireLogin,
-  requireAdmin,
-  (req, res) => {
-
-    res.sendFile(
-      path.join(publicPath, 'admin-builder.html')
     );
   }
 );

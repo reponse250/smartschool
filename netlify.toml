@@ -33,12 +33,6 @@
   force = true
 
 [[redirects]]
-  from = "/admin-interface/*"
-  to = "https://smartschool-o73k.onrender.com/admin-interface/:splat"
-  status = 200
-  force = true
-
-[[redirects]]
   from = "/api/*"
   to = "https://smartschool-o73k.onrender.com/api/:splat"
   status = 200

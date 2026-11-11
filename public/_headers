@@ -1,9 +1,6 @@
 /
   X-Robots-Tag: index, follow
 
-/admin-builder.html
-  X-Robots-Tag: noindex, nofollow
-
 /admin.html
   X-Robots-Tag: noindex, nofollow
 

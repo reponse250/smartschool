@@ -605,7 +605,7 @@ html = '''<!DOCTYPE html>
             <a href="teachers.html"><i class="fa-solid fa-users"></i> Teachers</a>
             <a href="super-admin.html"><i class="fa-solid fa-user-gear"></i> User Management</a>
             <a href="report.html"><i class="fa-solid fa-chart-pie"></i> Reports</a>
-            <a href="admin-builder.html"><i class="fa-solid fa-gear"></i> Settings</a>
+            <a href="settings.html"><i class="fa-solid fa-gear"></i> Settings</a>
         </div>
 
         <div class="nav-footer">

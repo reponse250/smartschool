@@ -3,7 +3,6 @@
 /save-attendance https://smartschool-o73k.onrender.com/save-attendance 200
 /ask-ai https://smartschool-o73k.onrender.com/ask-ai 200
 /teacher-record https://smartschool-o73k.onrender.com/teacher-record 200
-/admin-interface/* https://smartschool-o73k.onrender.com/admin-interface/:splat 200
 /api/* https://smartschool-o73k.onrender.com/api/:splat 200
 /messages/* https://smartschool-o73k.onrender.com/messages/:splat 200
 /teachers https://smartschool-o73k.onrender.com/teachers 200

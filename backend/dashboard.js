@@ -18,7 +18,7 @@ router.get('/dashboard', (req, res) => {
   }
 
   if (role === 'admin') {
-    return res.redirect('/admin-builder.html');
+    return res.redirect('/admin.html');
   }
 
   res.status(403).send('❌ Access denied');

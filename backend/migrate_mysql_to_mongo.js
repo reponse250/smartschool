@@ -118,11 +118,10 @@ async function migrate() {
     try {
         const [tableRows] = await source.query('SHOW TABLES');
         const tables = new Set(tableRows.map((row) => String(Object.values(row)[0]).toLowerCase()));
-        const [userRows, teacherRows, attendanceRows, layoutRows] = await Promise.all([
+        const [userRows, teacherRows, attendanceRows] = await Promise.all([
             readTable(source, tables, 'users', true),
             readTable(source, tables, 'teachers', true),
-            readTable(source, tables, 'attendance', true),
-            readTable(source, tables, 'admin_layout')
+            readTable(source, tables, 'attendance', true)
         ]);
 
         const users = userRows.map((row) => ({
@@ -140,24 +139,8 @@ async function migrate() {
             migration_source: 'mysql'
         }));
         const attendance = buildAttendanceDocuments(attendanceRows);
-        const layouts = layoutRows.map((row) => {
-            let layout = row.layout;
-            if (typeof layout === 'string') {
-                try {
-                    layout = JSON.parse(layout);
-                } catch {
-                    layout = [];
-                }
-            }
-            return {
-                user_id: numericId(row.user_id, 'layout user_id'),
-                layout,
-                migration_source: 'mysql'
-            };
-        });
-
         const database = await db.connect();
-        for (const name of ['users', 'teachers', 'attendance', 'admin_layout']) {
+        for (const name of ['users', 'teachers', 'attendance']) {
             const unmanagedCount = await database.collection(name).countDocuments({ migration_source: { $ne: 'mysql' } });
             if (unmanagedCount > 0) {
                 throw new Error(`MongoDB collection "${name}" contains non-migration data; no records were overwritten.`);
@@ -167,8 +150,6 @@ async function migrate() {
         await upsertDocuments(database.collection('users'), users, 'id');
         await upsertDocuments(database.collection('teachers'), teachers, 'id');
         await upsertDocuments(database.collection('attendance'), attendance, 'migration_key');
-        await upsertDocuments(database.collection('admin_layout'), layouts, 'user_id');
-
         for (const [name, documents] of [['users', users], ['teachers', teachers], ['attendance', attendance]]) {
             const maxId = documents.reduce((maximum, document) => Math.max(maximum, document.id), 0);
             if (maxId > 0) {
@@ -180,7 +161,7 @@ async function migrate() {
             }
         }
 
-        console.log(`Imported ${users.length} users, ${teachers.length} teachers, ${attendance.length} attendance events, and ${layouts.length} admin layouts.`);
+        console.log(`Imported ${users.length} users, ${teachers.length} teachers, and ${attendance.length} attendance events.`);
         console.log('MySQL records were read only. Run the importer again to resume safely if interrupted.');
     } finally {
         await source.end();
