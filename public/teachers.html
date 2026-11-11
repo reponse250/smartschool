@@ -501,7 +501,7 @@ async function addTeacher(e){
     }
 }
 
-async function deleteTeacher(id,name){ if(!confirm(`⚠️ PERMANENT ACTION\n\nDelete "${name}" and all their logs?`)) return; showTeacherProgress(); updateTeacherProgress(30); try{ const res=await fetch(`${API}/${id}`,{method:'DELETE',credentials:'include'}); const result=await res.json(); if(res.status===401){ window.location='login.html'; return;} if(res.status===403){ showTeacherStatus('Only admins can delete teachers.', '#b91c1c'); return;} if(res.ok&&result.status==='success'){ await loadTeachers(); }else{ showTeacherStatus(`Error: ${result.message||'Could not delete.'}`, '#b91c1c'); }}catch(err){ console.error(err); showTeacherStatus('Server not reachable.', '#b91c1c'); } finally { hideTeacherProgress(); }}
+async function deleteTeacher(id,name){ if(!await window.confirmAction({title:'Delete Teacher?',message:`Are you sure you want to delete "${name}" and all their attendance logs?`,detail:'This action cannot be undone.',confirmText:'Delete'})) return; showTeacherProgress(); updateTeacherProgress(30); try{ const res=await fetch(`${API}/${id}`,{method:'DELETE',credentials:'include'}); const result=await res.json(); if(res.status===401){ window.location='login.html'; return;} if(res.status===403){ showTeacherStatus('Only admins can delete teachers.', '#b91c1c'); return;} if(res.ok&&result.status==='success'){ await loadTeachers(); }else{ showTeacherStatus(`Error: ${result.message||'Could not delete.'}`, '#b91c1c'); }}catch(err){ console.error(err); showTeacherStatus('Server not reachable.', '#b91c1c'); } finally { hideTeacherProgress(); }}
 document.addEventListener('DOMContentLoaded',loadTeachers);
 </script>
 <script src="assets/theme.js"></script>

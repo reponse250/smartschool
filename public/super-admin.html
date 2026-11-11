@@ -76,6 +76,7 @@
         .brand-mark {
             width: 28px;
             height: 28px;
+            overflow: hidden;
             border-radius: 8px;
             display: flex;
             align-items: center;
@@ -86,6 +87,8 @@
             font-size: 0.7rem;
             flex-shrink: 0;
         }
+
+        .brand-mark img { display: block; width: 100%; height: 100%; }
 
         .nav-brand h1 {
             font-size: 1.08rem;
@@ -906,7 +909,7 @@
 
     <nav>
         <div class="nav-brand">
-            <div class="brand-mark"><i class="fas fa-school"></i></div>
+            <div class="brand-mark"><img src="/assets/smartschool-icon.svg" alt=""></div>
             <h1>SmartSchool</h1>
         </div>
 
@@ -1119,7 +1122,12 @@
                 throw new Error('Invalid notification ID.');
             }
 
-            if (!confirm('Delete this notification from ' + (notification.sender_name || 'System') + '?')) {
+            if (!await window.confirmAction({
+                title: 'Delete Notification?',
+                message: 'Are you sure you want to delete this notification from ' + (notification.sender_name || 'System') + '?',
+                detail: 'This action cannot be undone.',
+                confirmText: 'Delete'
+            })) {
                 return;
             }
 
@@ -1320,7 +1328,12 @@
         };
 
         window.deleteUser = async function (id, name) {
-            if (!confirm('Delete ' + name + '?')) return;
+            if (!await window.confirmAction({
+                title: 'Delete User?',
+                message: 'Are you sure you want to delete ' + name + '?',
+                detail: 'This action cannot be undone.',
+                confirmText: 'Delete'
+            })) return;
             const res = await fetch('/users/' + id, { method: 'DELETE' });
             const data = await res.json();
             if (data.status === 'success') loadUsers();

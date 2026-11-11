@@ -672,7 +672,7 @@
 
                 <section id="notificationsPanel" class="messages-panel hidden" role="tabpanel" aria-labelledby="notificationsTab">
                     <div class="panel-heading">
-                        <div><h2>System notifications</h2><p>Announcements and notes sent to the school.</p></div>
+                        <div><h2>System notifications</h2><p>Announcements and notes sent to the school. A super admin can permanently delete unwanted notifications.</p></div>
                         <button id="refreshNotifications" class="refresh-button" type="button"><i class="fa-solid fa-rotate"></i> Refresh</button>
                     </div>
                     <div id="systemNotifications" class="message-list" aria-live="polite"></div>
@@ -832,6 +832,8 @@
                 remove.type = 'button';
                 remove.className = 'action-button danger';
                 remove.innerHTML = '<i class="fa-solid fa-trash" aria-hidden="true"></i> Delete';
+                remove.setAttribute('aria-label', `Permanently delete notification from ${message.sender_name || 'sender'}`);
+                remove.title = 'Delete permanently';
                 remove.addEventListener('click', () => deleteNotification(message.id, remove));
                 actions.append(remove);
             }
@@ -1051,7 +1053,12 @@
         }
 
         async function deleteTeacherMessage(id, button) {
-            if (!window.confirm('Delete this reviewed message? This cannot be undone.')) return;
+            if (!await window.confirmAction({
+                title: 'Delete Message?',
+                message: 'Are you sure you want to delete this reviewed message?',
+                detail: 'This action cannot be undone.',
+                confirmText: 'Delete'
+            })) return;
             button.disabled = true;
             try {
                 await requestJson(`/messages/teacher/${encodeURIComponent(id)}`, { method: 'DELETE' });
@@ -1063,7 +1070,12 @@
         }
 
         async function deleteNotification(id, button) {
-            if (!window.confirm('Delete this system notification? This cannot be undone.')) return;
+            if (!await window.confirmAction({
+                title: 'Delete Notification?',
+                message: 'Are you sure you want to delete this system notification?',
+                detail: 'This action cannot be undone.',
+                confirmText: 'Delete'
+            })) return;
             button.disabled = true;
             try {
                 await requestJson(`/messages/notification/${encodeURIComponent(id)}`, { method: 'DELETE' });
@@ -1203,29 +1215,8 @@
             }
         });
 
-        document.getElementById('logoutButton').addEventListener('click', async event => {
-            const button = event.currentTarget;
-            button.disabled = true;
-            try {
-                const response = await fetch('/api/logout', {
-                    method: 'POST',
-                    credentials: 'include',
-                    headers: {
-                        Accept: 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: '{}'
-                });
-                const result = await response.json();
-                if (!response.ok || result.status !== 'success') {
-                    throw new Error(result.message || 'Logout request failed.');
-                }
-                window.location.replace('/');
-            } catch (error) {
-                console.error('Unable to sign out:', error);
-                window.alert('Unable to sign out. Please try again.');
-                button.disabled = false;
-            }
+        document.getElementById('logoutButton').addEventListener('click', event => {
+            window.smartSchoolLogout(event.currentTarget);
         });
 
         loadSession().catch(error => showStatus(document.getElementById('pageError'), error.message, 'error'));

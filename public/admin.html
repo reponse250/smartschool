@@ -551,11 +551,13 @@ body {
     display:grid;
     width:27px;
     height:27px;
+    overflow:hidden;
     place-items:center;
     color:#fff;
     background:#1765ef;
     border-radius:8px;
 }
+.sidebar-brand-mark img { display:block; width:100%; height:100%; }
 
 .sidebar-label {
     margin:18px 7px 7px;
@@ -1284,7 +1286,7 @@ body {
 <div id="adminProgress" class="progress-bar"><span></span></div>
 
 <aside class="app-sidebar" aria-label="Main navigation">
-    <div class="sidebar-brand"><span class="sidebar-brand-mark"><i class="fas fa-graduation-cap"></i></span> SmartSchool</div>
+    <div class="sidebar-brand"><span class="sidebar-brand-mark"><img src="/assets/smartschool-icon.svg" alt=""></span> SmartSchool</div>
     <div class="sidebar-label">School menu</div>
     <nav class="sidebar-nav">
         <a href="admin.html" class=""><i class="fas fa-house"></i><span>Dashboard</span></a>
@@ -1497,28 +1499,8 @@ const savedTheme = localStorage.getItem('smartschool-theme');
 const preferredTheme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 setTheme(savedTheme || preferredTheme, Boolean(savedTheme));
 
-document.getElementById('logoutButton').addEventListener('click', async () => {
-    const button = document.getElementById('logoutButton');
-    button.disabled = true;
-    try {
-        const response = await fetch('/api/logout', {
-            method: 'POST',
-            credentials: 'include',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: '{}'
-        });
-        const result = await response.json();
-        if (!response.ok || result.status !== 'success') {
-            throw new Error(result.message || 'Logout request failed.');
-        }
-        window.location.replace('/');
-    } catch (error) {
-        button.disabled = false;
-        alert('Unable to sign out. Please try again.');
-    }
+document.getElementById('logoutButton').addEventListener('click', event => {
+    window.smartSchoolLogout(event.currentTarget);
 });
 
 function setEmptyRow(container, message, columns = 1) {
@@ -1755,7 +1737,12 @@ async function reviewTeacherMessage(messageId, button) {
 }
 
 async function deleteTeacherMessage(messageId, button) {
-    if (!confirm('Delete this reviewed message? This cannot be undone.')) return;
+    if (!await window.confirmAction({
+        title: 'Delete Message?',
+        message: 'Are you sure you want to delete this reviewed message?',
+        detail: 'This action cannot be undone.',
+        confirmText: 'Delete'
+    })) return;
     button.disabled = true;
     try {
         const response = await fetch(`/messages/teacher/${Number(messageId)}`, { method:'DELETE' });
@@ -1974,7 +1961,12 @@ async function loadAdminNotifications() {
                 deleteButton.className = 'delete-btn';
                 deleteButton.textContent = 'Delete';
                 deleteButton.addEventListener('click', async () => {
-                    if (!confirm('Delete this notification?')) return;
+                    if (!await window.confirmAction({
+                        title: 'Delete Notification?',
+                        message: 'Are you sure you want to delete this notification?',
+                        detail: 'This action cannot be undone.',
+                        confirmText: 'Delete'
+                    })) return;
                     deleteButton.disabled = true;
                     try {
                         const result = await fetch(`/messages/notification/${Number(notification.id)}`, { method:'DELETE' });

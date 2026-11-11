@@ -58,10 +58,10 @@ const client = openaiApiKey
   ? new OpenAI({ apiKey: openaiApiKey })
   : null;
 
-const dummyPasswordHash = bcrypt.hash(
-  crypto.randomBytes(32).toString('hex'),
-  10
-);
+// Keep a fixed fallback hash so login checks never trigger a costly bcrypt
+// computation during server startup or under traffic spikes.
+const dummyPasswordHash =
+  '$2b$10$3f9KY2T9U3xB90X4m7NfCOJ6B6rNf7sV2vw1x2xA2fUHWtD0a0g2K';
 
 // =======================
 // CORS CONFIGURATION
@@ -397,6 +397,39 @@ const publicPath = path.join(
   __dirname,
   '../public'
 );
+
+const staticAssetCache = (res, filePath) => {
+  const normalizedPath = String(filePath || '').toLowerCase();
+
+  if (normalizedPath.endsWith('.html')) {
+    res.setHeader(
+      'Cache-Control',
+      'no-cache, no-store, must-revalidate'
+    );
+    return;
+  }
+
+  if (/\.(js|css)$/.test(normalizedPath)) {
+    res.setHeader(
+      'Cache-Control',
+      'public, max-age=0, must-revalidate'
+    );
+    return;
+  }
+
+  if (/\.(woff2?|ttf|svg|png|jpe?g|gif|webp|avif|ico)$/.test(normalizedPath)) {
+    res.setHeader(
+      'Cache-Control',
+      'public, max-age=31536000, immutable'
+    );
+    return;
+  }
+
+  res.setHeader(
+    'Cache-Control',
+    'public, max-age=86400'
+  );
+};
 
 // =======================
 // RATE LIMITER
@@ -904,7 +937,20 @@ app.get(
 );
 
 // Static files
-app.use(express.static(publicPath));
+app.use((req, res, next) => {
+  if (req.path === '/' || req.path.endsWith('.html')) {
+    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+  }
+  next();
+});
+
+app.use(express.static(publicPath, {
+  index: false,
+  maxAge: '1y',
+  etag: true,
+  lastModified: true,
+  setHeaders: staticAssetCache
+}));
 
 // =======================
 // LOGIN
@@ -937,13 +983,31 @@ app.post(
         });
       }
 
+      const normalizedUsername = username.toLowerCase();
       const database = await db.connect();
+      const users = database.collection('users');
+      const user = await users.findOne({
+        username: normalizedUsername
+      });
 
-      const user = await database
-        .collection('users')
-        .findOne({
-          username: username.toLowerCase()
-        });
+      if (user?.login_locked_until) {
+        const lockUntil = new Date(user.login_locked_until).getTime();
+
+        if (Number.isFinite(lockUntil) && lockUntil > Date.now()) {
+          return res.status(423).json({
+            status: 'error',
+            message: 'Too many failed login attempts. Please try again later.'
+          });
+        }
+
+        await users.updateOne(
+          { _id: user._id },
+          {
+            $unset: { login_locked_until: '', failed_attempts: '' },
+            $set: { failed_attempts: 0 }
+          }
+        );
+      }
 
       const passwordHash =
         typeof user?.password === 'string'
@@ -956,11 +1020,44 @@ app.post(
       );
 
       if (!user || !match) {
+        const currentFailedAttempts = user
+          ? Number(user.failed_attempts || 0)
+          : 0;
+        const nextFailedAttempts = currentFailedAttempts + 1;
+
+        if (user) {
+          const lockoutThreshold = 5;
+          const lockoutMs = 15 * 60 * 1000;
+          const update = {
+            $set: {
+              failed_attempts: nextFailedAttempts,
+              last_failed_login_at: new Date()
+            }
+          };
+
+          if (nextFailedAttempts >= lockoutThreshold) {
+            update.$set.login_locked_until = new Date(Date.now() + lockoutMs);
+          }
+
+          await users.updateOne({ _id: user._id }, update);
+        }
+
         return res.status(401).json({
           status: 'error',
           message: 'Invalid credentials'
         });
       }
+
+      await users.updateOne(
+        { _id: user._id },
+        {
+          $set: {
+            failed_attempts: 0,
+            last_failed_login_at: null,
+            login_locked_until: null
+          }
+        }
+      );
 
       req.session.regenerate(
         (regenerateError) => {

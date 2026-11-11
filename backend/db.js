@@ -3,7 +3,14 @@
 
   const mongoUrl = process.env.MONGODB_URI || 'mongodb+srv://iranezezareponse_db_user:ggssll@cluster0.ljiruuh.mongodb.net/';
   const databaseName = process.env.MONGODB_DB || 'smartschool_db';
-  const client = new MongoClient(mongoUrl, { serverSelectionTimeoutMS: 5000 });
+  const client = new MongoClient(mongoUrl, {
+    serverSelectionTimeoutMS: 5000,
+    maxPoolSize: 20,
+    minPoolSize: 2,
+    waitQueueTimeoutMS: 5000,
+    maxIdleTimeMS: 30_000,
+    heartbeatFrequencyMS: 10_000
+});
   let connection;
 
   async function connect() {

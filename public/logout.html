@@ -99,23 +99,47 @@
 
     <script>
         const bar = document.getElementById('logoutProgress');
-        let value = 10;
-        const interval = setInterval(() => {
-            if (value >= 100) return clearInterval(interval);
-            value += 15;
-            bar.style.width = value + '%';
-        }, 120);
+        document.addEventListener('DOMContentLoaded', async () => {
+            const confirmed = await window.confirmAction({
+                title: 'Confirm Action',
+                message: 'Are you sure you want to log out of the system?',
+                detail: 'You will be signed out and redirected to the login page.',
+                confirmText: 'Log Out'
+            });
 
-        fetch('/api/logout', {
-            method: 'POST',
-            credentials: 'include',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: '{}'
-        })
-            .then(async response => {
+            if (!confirmed) {
+                let returnUrl;
+                try {
+                    returnUrl = new URL(document.referrer);
+                } catch (error) {
+                    returnUrl = null;
+                }
+                window.location.replace(
+                    returnUrl && returnUrl.origin === window.location.origin &&
+                    returnUrl.pathname !== window.location.pathname
+                        ? returnUrl.href
+                        : '/'
+                );
+                return;
+            }
+
+            let value = 10;
+            const interval = setInterval(() => {
+                if (value >= 100) return clearInterval(interval);
+                value += 15;
+                bar.style.width = value + '%';
+            }, 120);
+
+            fetch('/api/logout', {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: '{}'
+            })
+                .then(async response => {
                 const result = await response.json();
                 if (!response.ok || result.status !== 'success') {
                     throw new Error(result.message || 'Unable to log out.');
@@ -127,6 +151,7 @@
                 bar.style.background = '#ef4444';
                 document.querySelector('.logout-card p').textContent = 'Unable to sign out. Please try again.';
             });
+        });
     </script>
 <script src="assets/theme.js"></script>
 </body>

@@ -2,33 +2,86 @@ const express = require('express');
 const router = express.Router();
 const path = require('path');
 const fs = require('fs').promises;
+const db = require('./db');
 
 const normalizeRole = (role) => typeof role === 'string' ? role.trim().replace(/-/g, '_') : role;
 
 const storePath = path.join(__dirname, 'messages.json');
+const storeId = 'message-store';
+let storeInitialization;
 
-async function ensureStore() {
+async function readLegacyMessages() {
   try {
-    await fs.access(storePath);
+    const content = await fs.readFile(storePath, 'utf8');
+    const messages = JSON.parse(content || '[]');
+    if (!Array.isArray(messages)) {
+      throw new TypeError('Legacy messages store must contain an array.');
+    }
+    return messages;
   } catch (err) {
-    await fs.writeFile(storePath, '[]', 'utf8');
+    if (err.code === 'ENOENT') return [];
+    throw err;
   }
+}
+
+async function initializeStore() {
+  if (!storeInitialization) {
+    storeInitialization = (async () => {
+      const database = await db.connect();
+      const collection = database.collection('messages_store');
+      const legacyMessages = await readLegacyMessages();
+      await collection.updateOne(
+        { _id: storeId },
+        { $setOnInsert: { revision: 0, messages: legacyMessages } },
+        { upsert: true }
+      );
+      return collection;
+    })().catch(error => {
+      storeInitialization = null;
+      throw error;
+    });
+  }
+  return storeInitialization;
+}
+
+async function getStore() {
+  const collection = await initializeStore();
+  const store = await collection.findOne({ _id: storeId });
+  if (!store || !Array.isArray(store.messages) || !Number.isSafeInteger(store.revision)) {
+    throw new Error('Persistent messages store is unavailable or invalid.');
+  }
+  return { collection, store };
 }
 
 async function loadMessages() {
-  await ensureStore();
-  const content = await fs.readFile(storePath, 'utf8');
-  try {
-    return JSON.parse(content || '[]');
-  } catch (err) {
-    console.error('Failed to parse messages store, resetting.', err);
-    await fs.writeFile(storePath, '[]', 'utf8');
-    return [];
-  }
+  const { store } = await getStore();
+  return store.messages;
 }
 
-async function saveMessages(messages) {
-  await fs.writeFile(storePath, JSON.stringify(messages, null, 2), 'utf8');
+async function updateMessages(update) {
+  let { collection, store } = await getStore();
+
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    if (attempt > 0) {
+      store = await collection.findOne({ _id: storeId });
+      if (!store || !Array.isArray(store.messages) || !Number.isSafeInteger(store.revision)) {
+        throw new Error('Persistent messages store is unavailable or invalid.');
+      }
+    }
+
+    const messages = store.messages;
+    const originalState = JSON.stringify(messages);
+    const result = await update(messages);
+    if (JSON.stringify(messages) === originalState) return result;
+
+    const write = await collection.replaceOne(
+      { _id: storeId, revision: store.revision },
+      { _id: storeId, revision: store.revision + 1, messages }
+    );
+    if (write.matchedCount === 1) return result;
+  }
+
+  throw new Error('Messages changed concurrently; please retry the operation.');
 }
 
 function createRecord(type, session, body) {
@@ -120,9 +173,9 @@ router.post('/teacher', async (req, res) => {
   }
 
   try {
-    const messages = await loadMessages();
-    messages.unshift(createRecord('teacher', req.session, { subject, message, priority }));
-    await saveMessages(messages);
+    await updateMessages(messages => {
+      messages.unshift(createRecord('teacher', req.session, { subject, message, priority }));
+    });
     res.json({ status: 'success', message: 'Problem report sent to admin.' });
   } catch (err) {
     console.error('Save teacher message failed:', err);
@@ -137,14 +190,14 @@ router.get('/teacher', async (req, res) => {
   }
 
   try {
-    const messages = await loadMessages();
-    const teacherMessages = messages.filter(message => message.type === 'teacher');
-    let changed = false;
-    teacherMessages.forEach(message => {
-      changed = markConversationRead(message, req.session.user.id) || changed;
+    const teacherMessages = await updateMessages(messages => {
+      const teacherRecords = messages.filter(message => message.type === 'teacher');
+      teacherRecords.forEach(message => {
+        markConversationRead(message, req.session.user.id);
+      });
+      return teacherRecords.map(forAdmin);
     });
-    if (changed) await saveMessages(messages);
-    res.json(teacherMessages.map(forAdmin));
+    res.json(teacherMessages);
   } catch (err) {
     console.error('Fetch teacher messages failed:', err);
     res.status(500).json({ status: 'error', message: 'Could not read messages.' });
@@ -158,17 +211,17 @@ router.get('/teacher/sent', async (req, res) => {
   }
 
   try {
-    const messages = await loadMessages();
-    const sentMessages = messages.filter(message =>
-      ['teacher', 'notification'].includes(message.type) &&
-      String(message.sender_id) === String(user.id)
-    );
-    let changed = false;
-    sentMessages.forEach(message => {
-      changed = markConversationRead(message, user.id) || changed;
+    const sentMessages = await updateMessages(messages => {
+      const sentRecords = messages.filter(message =>
+        ['teacher', 'notification'].includes(message.type) &&
+        String(message.sender_id) === String(user.id)
+      );
+      sentRecords.forEach(message => {
+        markConversationRead(message, user.id);
+      });
+      return sentRecords.map(forTeacher);
     });
-    if (changed) await saveMessages(messages);
-    res.json(sentMessages.map(forTeacher));
+    res.json(sentMessages);
   } catch (err) {
     console.error('Fetch sent teacher messages failed:', err);
     res.status(500).json({ status: 'error', message: 'Could not read your sent messages.' });
@@ -192,33 +245,35 @@ router.post('/teacher/:id/replies', async (req, res) => {
   }
 
   try {
-    const messages = await loadMessages();
-    const parent = messages.find(item => item.id === messageId && item.type === 'teacher');
-    if (!parent) {
-      return res.status(404).json({ status: 'error', message: 'Teacher message not found.' });
-    }
-    if (role === 'teacher' && String(parent.sender_id) !== String(user.id)) {
-      return res.status(403).json({ status: 'error', message: 'You can only reply to your own messages.' });
-    }
+    const result = await updateMessages(messages => {
+      const parent = messages.find(item => item.id === messageId && item.type === 'teacher');
+      if (!parent) return { status: 404, message: 'Teacher message not found.' };
+      if (role === 'teacher' && String(parent.sender_id) !== String(user.id)) {
+        return { status: 403, message: 'You can only reply to your own messages.' };
+      }
 
-    if (!Array.isArray(parent.replies)) parent.replies = [];
-    parent.replies.push({
-      id: Date.now() + Math.floor(Math.random() * 1000),
-      sender_id: user.id,
-      sender_name: user.name,
-      sender_role: role,
-      message: message.trim(),
-      created_at: new Date().toISOString(),
-      read_by: [String(user.id)]
+      if (!Array.isArray(parent.replies)) parent.replies = [];
+      parent.replies.push({
+        id: Date.now() + Math.floor(Math.random() * 1000),
+        sender_id: user.id,
+        sender_name: user.name,
+        sender_role: role,
+        message: message.trim(),
+        created_at: new Date().toISOString(),
+        read_by: [String(user.id)]
+      });
+      if (role === 'admin' || role === 'super_admin') {
+        parent.status = 'reviewed';
+        parent.reviewed_at = new Date().toISOString();
+        parent.reviewed_by = user.id;
+        parent.reviewed_by_name = user.name;
+      }
+      return null;
     });
-    if (role === 'admin' || role === 'super_admin') {
-      parent.status = 'reviewed';
-      parent.reviewed_at = new Date().toISOString();
-      parent.reviewed_by = user.id;
-      parent.reviewed_by_name = user.name;
+    if (result) {
+      return res.status(result.status).json({ status: 'error', message: result.message });
     }
 
-    await saveMessages(messages);
     res.json({ status: 'success', message: 'Reply sent.' });
   } catch (err) {
     console.error('Save teacher message reply failed:', err);
@@ -238,17 +293,20 @@ router.patch('/teacher/:id/review', async (req, res) => {
   }
 
   try {
-    const messages = await loadMessages();
-    const message = messages.find(item => item.id === messageId && item.type === 'teacher');
-    if (!message) {
-      return res.status(404).json({ status: 'error', message: 'Teacher message not found.' });
+    const result = await updateMessages(messages => {
+      const message = messages.find(item => item.id === messageId && item.type === 'teacher');
+      if (!message) return { status: 404, message: 'Teacher message not found.' };
+
+      message.status = 'reviewed';
+      message.reviewed_at = new Date().toISOString();
+      message.reviewed_by = req.session.user.id;
+      message.reviewed_by_name = req.session.user.name;
+      return null;
+    });
+    if (result) {
+      return res.status(result.status).json({ status: 'error', message: result.message });
     }
 
-    message.status = 'reviewed';
-    message.reviewed_at = new Date().toISOString();
-    message.reviewed_by = req.session.user.id;
-    message.reviewed_by_name = req.session.user.name;
-    await saveMessages(messages);
     res.json({ status: 'success', message: 'Message marked as reviewed.' });
   } catch (err) {
     console.error('Review teacher message failed:', err);
@@ -268,16 +326,21 @@ router.delete('/teacher/:id', async (req, res) => {
   }
 
   try {
-    const messages = await loadMessages();
-    const message = messages.find(item => item.id === messageId && item.type === 'teacher');
-    if (!message) {
-      return res.status(404).json({ status: 'error', message: 'Teacher message not found.' });
-    }
-    if (message.status !== 'reviewed') {
-      return res.status(409).json({ status: 'error', message: 'Review this message before deleting it.' });
+    const result = await updateMessages(messages => {
+      const message = messages.find(item => item.id === messageId && item.type === 'teacher');
+      if (!message) return { status: 404, message: 'Teacher message not found.' };
+      if (message.status !== 'reviewed') {
+        return { status: 409, message: 'Review this message before deleting it.' };
+      }
+
+      const remaining = messages.filter(item => !(item.id === messageId && item.type === 'teacher'));
+      messages.splice(0, messages.length, ...remaining);
+      return null;
+    });
+    if (result) {
+      return res.status(result.status).json({ status: 'error', message: result.message });
     }
 
-    await saveMessages(messages.filter(item => !(item.id === messageId && item.type === 'teacher')));
     res.json({ status: 'success', message: 'Reviewed message deleted.' });
   } catch (err) {
     console.error('Delete teacher message failed:', err);
@@ -287,7 +350,6 @@ router.delete('/teacher/:id', async (req, res) => {
 
 router.post('/notification', async (req, res) => {
   const role = normalizeRole(req.session?.user?.role);
-  // Allow super_admin and teachers to create notifications to be shown to admins/superadmins
   if (!req.session.user || !['super_admin','teacher'].includes(role)) {
     return res.status(403).json({ status: 'error', message: 'Only super admin or teachers may send notification.' });
   }
@@ -301,9 +363,9 @@ router.post('/notification', async (req, res) => {
   }
 
   try {
-    const messages = await loadMessages();
-    messages.unshift(createRecord('notification', req.session, { message, priority }));
-    await saveMessages(messages);
+    await updateMessages(messages => {
+      messages.unshift(createRecord('notification', req.session, { message, priority }));
+    });
     res.json({ status: 'success', message: 'Notification created successfully.' });
   } catch (err) {
     console.error('Save notification failed:', err);
@@ -312,7 +374,6 @@ router.post('/notification', async (req, res) => {
 });
 
 router.get('/notification', async (req, res) => {
-  // Allow any authenticated user to READ notifications so everyone can see them
   if (!req.session.user) {
     return res.status(403).json({ status: 'error', message: 'Access denied.' });
   }
@@ -344,13 +405,10 @@ router.patch('/notification/read', async (req, res) => {
   }
 
   try {
-    const messages = await loadMessages();
-    const notifications = messages.filter(message => message.type === 'notification');
-    let changed = false;
-    notifications.forEach(message => {
-      changed = markRead(message, user.id) || changed;
+    await updateMessages(messages => {
+      messages.filter(message => message.type === 'notification')
+        .forEach(message => markRead(message, user.id));
     });
-    if (changed) await saveMessages(messages);
     res.json({ status: 'success', message: 'Notifications marked as read.' });
   } catch (err) {
     console.error('Mark notifications read failed:', err);
@@ -360,7 +418,7 @@ router.patch('/notification/read', async (req, res) => {
 
 router.delete('/notification/:id', async (req, res) => {
   const role = normalizeRole(req.session?.user?.role);
-  if (!req.session.user || role !== 'super_admin') {
+  if (!req.session?.user || role !== 'super_admin') {
     return res.status(403).json({ status: 'error', message: 'Only the super admin can delete notifications.' });
   }
 
@@ -370,17 +428,23 @@ router.delete('/notification/:id', async (req, res) => {
   }
 
   try {
-    const messages = await loadMessages();
-    const updatedMessages = messages.filter(message =>
-      !(message.id === notificationId && message.type === 'notification')
-    );
+    const result = await updateMessages(messages => {
+      const exists = messages.some(message =>
+        message.id === notificationId && message.type === 'notification'
+      );
+      if (!exists) return { status: 404, message: 'Notification not found.' };
 
-    if (updatedMessages.length === messages.length) {
-      return res.status(404).json({ status: 'error', message: 'Notification not found.' });
+      const remaining = messages.filter(message =>
+        !(message.id === notificationId && message.type === 'notification')
+      );
+      messages.splice(0, messages.length, ...remaining);
+      return null;
+    });
+    if (result) {
+      return res.status(result.status).json({ status: 'error', message: result.message });
     }
 
-    await saveMessages(updatedMessages);
-    res.json({ status: 'success', message: 'Notification deleted successfully.' });
+    res.json({ status: 'success', message: 'Notification deleted permanently.' });
   } catch (err) {
     console.error('Delete notification failed:', err);
     res.status(500).json({ status: 'error', message: 'Could not delete notification.' });
@@ -389,8 +453,9 @@ router.delete('/notification/:id', async (req, res) => {
 
 // Endpoint for anonymous or forgotten-password notifications
 router.post('/forgot-password', async (req, res) => {
-  // Accept both logged-in and anonymous requests; attempt to include session user if present
-  const sender = (req.session && req.session.user) ? { id: req.session.user.id, name: req.session.user.name, role: req.session.user.role } : { id: null, name: 'Anonymous', role: 'anonymous' };
+  const sender = (req.session && req.session.user)
+    ? { id: req.session.user.id, name: req.session.user.name, role: req.session.user.role }
+    : { id: null, name: 'Anonymous', role: 'anonymous' };
   const { username, note } = req.body || {};
   if ((username !== undefined && (typeof username !== 'string' || username.length > 100)) ||
       (note !== undefined && (typeof note !== 'string' || note.length > 1800))) {
@@ -403,24 +468,22 @@ router.post('/forgot-password', async (req, res) => {
   }
 
   try {
-    const messages = await loadMessages();
-    // create record with minimal session-like object
-    const record = {
-      id: Date.now() + Math.floor(Math.random() * 1000),
-      type: 'notification',
-      sender_id: sender.id,
-      sender_name: sender.name,
-      sender_role: sender.role,
-      subject: 'Forgot password',
-      message: messageText,
-      priority: 'normal',
-      status: 'new',
-      created_at: new Date().toISOString(),
-      read_by: [],
-      replies: []
-    };
-    messages.unshift(record);
-    await saveMessages(messages);
+    await updateMessages(messages => {
+      messages.unshift({
+        id: Date.now() + Math.floor(Math.random() * 1000),
+        type: 'notification',
+        sender_id: sender.id,
+        sender_name: sender.name,
+        sender_role: sender.role,
+        subject: 'Forgot password',
+        message: messageText,
+        priority: 'normal',
+        status: 'new',
+        created_at: new Date().toISOString(),
+        read_by: [],
+        replies: []
+      });
+    });
     res.json({ status: 'success', message: 'Super admin notified.' });
   } catch (err) {
     console.error('Forgot-password notify failed:', err);
