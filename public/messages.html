@@ -69,15 +69,6 @@
             font-size: 0.8rem;
         }
 
-        .messages-nav-label {
-            margin: 20px 8px 8px;
-            color: #8ea3c1;
-            font-size: 10px;
-            font-weight: 800;
-            letter-spacing: .12em;
-            text-transform: uppercase;
-        }
-
         .messages-nav { display: grid; gap: 4px; }
 
         .messages-nav a,
@@ -508,7 +499,7 @@
         @media (max-width: 760px) {
             .messages-sidebar { position: static; width: 100%; padding: 10px 14px; }
             .messages-brand { padding-bottom: 10px; }
-            .messages-nav-label, .messages-sidebar-footer { display: none; }
+            .messages-sidebar-footer { display: none; }
             .messages-nav { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 4px; padding-top: 8px; }
             .messages-nav a, .messages-nav button { width: 100%; min-width: 0; min-height: 34px; padding: 7px 8px; gap: 7px; white-space: nowrap; }
             .messages-main { width: 100%; margin: 0; padding: 22px 16px; }
@@ -538,7 +529,6 @@
     <div class="messages-app">
         <aside class="messages-sidebar" aria-label="Main navigation">
             <a id="messagesBrand" class="messages-brand" href="attendance.html"><i class="fa-solid fa-graduation-cap" aria-hidden="true"></i> SmartSchool</a>
-            <div class="messages-nav-label">School menu</div>
             <nav class="messages-nav">
                 <a href="admin.html" data-role-link="admin"><i class="fa-solid fa-house"></i> Dashboard</a>
                 <a href="super-admin.html" data-role-link="super_admin"><i class="fa-solid fa-user-shield"></i> Super Admin</a>
@@ -548,13 +538,6 @@
                 <a href="monthly_report.html"><i class="fa-solid fa-book-open"></i> Monthly Report</a>
                 <a href="messages.html" class="active" aria-current="page"><i class="fa-solid fa-message"></i> Messages</a>
                 <a href="settings.html" data-role-link="super_admin"><i class="fa-solid fa-gear"></i> Settings</a>
-            </nav>
-            <div class="messages-nav-label" data-role-link="admin">Admin tools</div>
-            <nav class="messages-nav" data-role-link="admin">
-                <a href="teachers.html"><i class="fa-solid fa-user-gear"></i> Manage Staff</a>
-            </nav>
-            <div class="messages-nav-label">Account</div>
-            <nav class="messages-nav">
                 <button id="sidebarThemeToggle" type="button" data-theme-toggle>
                     <i class="fa-solid fa-moon" aria-hidden="true"></i><span>Dark mode</span>
                 </button>

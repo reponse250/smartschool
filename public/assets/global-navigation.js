@@ -16,7 +16,7 @@
     function getRoleLinks(role) {
         if (role === 'super_admin') {
             return [
-                { label: 'Dashboard', href: '/admin.html', icon: '⌂', section: 'School menu' },
+                { label: 'Dashboard', href: '/admin.html', icon: '⌂' },
                 { label: 'Super Admin', href: '/super-admin.html', icon: '◆' },
                 { label: 'Attendance', href: '/attendance.html', icon: '✓' },
                 { label: 'Teachers', href: '/teachers.html', icon: '♙' },
@@ -24,32 +24,30 @@
                 { label: 'Monthly Report', href: '/monthly_report.html', icon: '▦' },
                 { label: 'Messages', href: '/messages.html', icon: '✉' },
                 { label: 'Settings', href: '/settings.html', icon: '⚙' },
-                { label: 'Manage Staff', href: '/teachers.html', icon: '♧', section: 'Admin tools' },
-                { label: 'Dark mode', action: 'theme', icon: '◐', section: 'Account' },
+                { label: 'Dark mode', action: 'theme', icon: '◐' },
                 { label: 'Log out', action: 'logout', icon: '↪' }
             ];
         }
 
         if (role === 'admin') {
             return [
-                { label: 'Dashboard', href: '/admin.html', icon: '⌂', section: 'School menu' },
+                { label: 'Dashboard', href: '/admin.html', icon: '⌂' },
                 { label: 'Attendance', href: '/attendance.html', icon: '✓' },
                 { label: 'Teachers', href: '/teachers.html', icon: '♙' },
                 { label: 'Daily Report', href: '/report.html', icon: '▤' },
                 { label: 'Monthly Report', href: '/monthly_report.html', icon: '▦' },
                 { label: 'Messages', href: '/messages.html', icon: '✉' },
-                { label: 'Manage Staff', href: '/teachers.html', icon: '♧', section: 'Admin tools' },
-                { label: 'Dark mode', action: 'theme', icon: '◐', section: 'Account' },
+                { label: 'Dark mode', action: 'theme', icon: '◐' },
                 { label: 'Log out', action: 'logout', icon: '↪' }
             ];
         }
 
         return [
-            { label: 'Home', href: '/attendance.html', icon: '⌂', section: 'School menu' },
+            { label: 'Home', href: '/attendance.html', icon: '⌂' },
             { label: 'Daily Report', href: '/report.html', icon: '▤' },
             { label: 'Monthly Report', href: '/monthly_report.html', icon: '▦' },
             { label: 'Messages', href: '/messages.html', icon: '✉' },
-            { label: 'Dark mode', action: 'theme', icon: '◐', section: 'Account' },
+            { label: 'Dark mode', action: 'theme', icon: '◐' },
             { label: 'Log out', action: 'logout', icon: '↪' }
         ];
     }
@@ -135,13 +133,7 @@
             }
         }
 
-        let currentSection = '';
         roleLinks.forEach(item => {
-            if (item.section && item.section !== currentSection) {
-                currentSection = item.section;
-                navigation.appendChild(createElement('p', 'global-navigation-section', currentSection));
-            }
-
             const link = item.action ? createElement('button') : createElement('a');
             if (item.action) {
                 link.type = 'button';

@@ -163,15 +163,6 @@
     min-width: 0;
 }
 
-.global-navigation-section {
-    margin: 20px 8px 8px;
-    color: #7f91ad;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-}
-
 .global-navigation-error {
     margin: 10px 2px;
     color: #fecaca;
