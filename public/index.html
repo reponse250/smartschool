@@ -144,6 +144,21 @@
             background: #fff;
         }
 
+        .password-input-wrap { position: relative; }
+        .password-input-wrap input { padding-right: 48px; }
+        .password-toggle {
+            position: absolute;
+            top: 50%;
+            right: 12px;
+            transform: translateY(-50%);
+            padding: 8px;
+            border: 0;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+        .password-toggle:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 6px; }
+
         .forgot-link {
             display: block;
             text-align: right;
@@ -231,7 +246,12 @@
         
         <div class="form-group">
             <label>PASSWORD</label>
-            <input type="password" id="password" placeholder="••••••••" required>
+            <div class="password-input-wrap">
+                <input type="password" id="password" placeholder="••••••••" required>
+                <button type="button" class="password-toggle" id="togglePassword" aria-label="Show password" aria-pressed="false">
+                    <i class="fa-solid fa-eye" aria-hidden="true"></i>
+                </button>
+            </div>
         </div>
 
         <a href="javascript:void(0)" class="forgot-link" onclick="handleForgot()">Forgot Password?</a>
@@ -250,6 +270,16 @@
     const form = document.getElementById('loginForm');
     const msg = document.getElementById('message');
     const btn = document.getElementById('loginBtn');
+    const passwordInput = document.getElementById('password');
+    const togglePassword = document.getElementById('togglePassword');
+
+    togglePassword.addEventListener('click', () => {
+        const isVisible = passwordInput.type === 'text';
+        passwordInput.type = isVisible ? 'password' : 'text';
+        togglePassword.setAttribute('aria-label', isVisible ? 'Show password' : 'Hide password');
+        togglePassword.setAttribute('aria-pressed', String(!isVisible));
+        togglePassword.innerHTML = `<i class="fa-solid ${isVisible ? 'fa-eye' : 'fa-eye-slash'}" aria-hidden="true"></i>`;
+    });
 
     function handleForgot() {
         const username = document.getElementById('username').value.trim();
