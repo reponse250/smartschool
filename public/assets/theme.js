@@ -8,7 +8,7 @@
 
         const navigationStyles = document.createElement('link');
         navigationStyles.rel = 'stylesheet';
-        navigationStyles.href = '/assets/global-navigation.css?v=20261024-7';
+        navigationStyles.href = '/assets/global-navigation.css?v=20261111-1';
         document.head.appendChild(navigationStyles);
 
         const navigationScript = document.createElement('script');
