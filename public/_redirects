@@ -15,3 +15,10 @@
 /monthly-report/* https://smartschool-o73k.onrender.com/monthly-report/:splat 200
 /export-pdf https://smartschool-o73k.onrender.com/export-pdf 200
 /export-pdf/* https://smartschool-o73k.onrender.com/export-pdf/:splat 200
+
+# Canonical clean URLs for static pages
+/super-admin.html /super-admin 301
+/super-admin /super-admin.html 200
+/admin.html /admin 301
+/admin /admin.html 200
+/index.html / 301
