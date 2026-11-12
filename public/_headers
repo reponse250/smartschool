@@ -7,6 +7,12 @@
 /attendance.html
   X-Robots-Tag: noindex, nofollow
 
+/sw.js
+  Cache-Control: no-cache
+
+/manifest.webmanifest
+  Content-Type: application/manifest+json
+
 /exportPdf.html
   X-Robots-Tag: noindex, nofollow
 

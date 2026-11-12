@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <title>SmartSchool | Mark Attendance</title>
 <link rel="icon" type="image/svg+xml" href="/assets/smartschool-icon.svg?v=20261111-1">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#2563eb">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="assets/style.css">
 <link rel="stylesheet" href="assets/theme.css">
@@ -237,6 +239,40 @@ display: none;
 }
 .status-message.success { display: block; border-color: #b9dfc8; background: var(--success-soft); color: var(--success); }
 .status-message.error { display: block; border-color: #f0c4bf; background: var(--error-soft); color: var(--error); }
+.offline-status {
+    margin: 0 0 18px;
+    padding: 12px 15px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.5;
+}
+.offline-status[data-state="offline"], .offline-status[data-state="error"] {
+    border-color: #f0c4bf;
+    background: var(--error-soft);
+    color: var(--error);
+}
+.offline-status[data-state="pending"] {
+    border-color: #facc15;
+    background: rgba(250, 204, 21, 0.12);
+    color: #854d0e;
+}
+.pending-panel {
+    margin-top: 18px;
+    padding: 20px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--surface);
+}
+.pending-panel[hidden] { display: none; }
+.pending-panel h2 { margin: 0 0 5px; font-size: 16px; }
+.pending-note { margin: 0 0 12px; color: var(--text-muted); font-size: 12px; line-height: 1.5; }
+.pending-list { display: grid; gap: 8px; list-style: none; }
+.pending-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 13px; }
+.pending-item button { border: 0; background: none; color: var(--error); cursor: pointer; font: inherit; font-weight: 800; }
 .issue-panel {
     display: grid;
     grid-template-columns: minmax(180px, 0.7fr) minmax(0, 1.3fr);
@@ -340,6 +376,10 @@ display: none;
     <div id="notificationList">Loading notifications...</div>
 </div>
 
+<div id="offlineStatus" class="offline-status" role="status" aria-live="polite">
+    Preparing offline attendance...
+</div>
+
 <section class="attendance-workspace" aria-label="Attendance entry">
     <div class="clock-panel">
         <p class="clock-label">LOCAL TIME</p>
@@ -376,6 +416,12 @@ display: none;
     </div>
 </section>
 
+<section id="pendingPanel" class="pending-panel" aria-labelledby="pendingHeading" hidden>
+    <h2 id="pendingHeading">Waiting to sync</h2>
+    <p class="pending-note">These entries are saved on this device and are not confirmed attendance records yet. Their times use this device's clock. Avoid offline use on shared or public devices.</p>
+    <ul id="pendingList" class="pending-list"></ul>
+</section>
+
 <section class="issue-panel" aria-labelledby="issueHeading">
     <div class="issue-heading">
         <span class="eyebrow">HELP DESK</span>
@@ -394,6 +440,7 @@ display: none;
 <a href="admin.html" class="back-link"><i class="fas fa-arrow-left" aria-hidden="true"></i> Back to dashboard</a>
 </main>
 
+<script src="/attendance-offline.js"></script>
 <script>
 
 /* CLOCK */
@@ -424,8 +471,7 @@ async function loadTeachers(){
     select.innerHTML='<option value="">Loading teacher list...</option>';
 
     try{
-        const res=await fetch('/api/teachers', { headers: { Accept: 'application/json' } });
-        const data=await res.json();
+        const data = await window.smartSchoolOffline.initialize();
 
         select.innerHTML='<option value="">Select Teacher</option>';
         data.forEach(t=>{
@@ -435,7 +481,9 @@ async function loadTeachers(){
             select.appendChild(opt);
         });
     }catch(err){
-        select.innerHTML='<option value="">Error loading list</option>';
+        select.innerHTML='<option value="">Connect online to load teachers</option>';
+        document.getElementById('offlineStatus').dataset.state = 'error';
+        document.getElementById('offlineStatus').textContent = err.message;
         console.error('Teacher list load failed', err);
     } finally {
         hideProgress();
@@ -530,38 +578,38 @@ form.addEventListener('submit',async function(e){
 
 e.preventDefault();
 
+const teacher_id=document.getElementById('teacherSelect').value;
+const action=document.getElementById('actionSelect').value;
+if (!teacher_id || !action) return;
+
 btn.disabled=true;
 btn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Processing...';
 showProgress();
 updateProgress(35);
 
-const teacher_id=document.getElementById('teacherSelect').value;
-const action=document.getElementById('actionSelect').value;
-
 try{
 
-const res=await fetch('/save-attendance',{
-method:'POST',
-headers:{'Content-Type':'application/json'},
-body:JSON.stringify({teacher_id,action})
+const result = await window.smartSchoolOffline.record({
+    teacher_id,
+    action,
+    teacher_name: document.getElementById('teacherSelect').selectedOptions[0].textContent
 });
-
-const data = await res.json();
 updateProgress(75);
 
 msg.style.display='block';
 
-if(data.status === 'success'){
+if(result.synced){
 
 msg.className='status-message success';
-msg.textContent='Attendance logged successfully!';
+msg.textContent='Attendance confirmed by the server.';
 
 form.reset();
 
 }else{
 
-msg.className='status-message error';
-msg.textContent=data.message || 'Unable to save attendance.';
+msg.className='status-message success';
+msg.textContent='Saved on this device. It will sync when the connection returns.';
+form.reset();
 
 }
 
@@ -569,7 +617,7 @@ msg.textContent=data.message || 'Unable to save attendance.';
 
 msg.style.display='block';
 msg.className='status-message error';
-msg.textContent='Network error. Please check connection.';
+msg.textContent=err.message || 'Unable to save attendance.';
 
 }
 
@@ -586,6 +634,22 @@ msg.style.display='none';
 }
 
 });
+
+window.addEventListener('online', () => {
+    window.smartSchoolOffline.reconnect().catch(err => console.error('Attendance sync failed', err));
+});
+window.addEventListener('offline', () => window.smartSchoolOffline.updateStatus());
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+            .catch(err => {
+                console.error('Offline app setup failed', err);
+                const status = document.getElementById('offlineStatus');
+                status.dataset.state = 'error';
+                status.textContent = 'Offline page caching is unavailable in this browser.';
+            });
+    });
+}
 
 sendIssueBtn.addEventListener('click', sendIssue);
 

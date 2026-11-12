@@ -20,6 +20,7 @@
         await Promise.all([
           database.collection('users').createIndex({ username: 1 }, { unique: true }),
           database.collection('attendance').createIndex({ teacher_id: 1, status_time: 1 }),
+          database.collection('attendance').createIndex({ client_event_id: 1 }, { unique: true, sparse: true }),
           database.collection('attendance').createIndex({ action: 1, status_time: 1, teacher_id: 1 }),
           database.collection('attendance').createIndex({ status_time: 1, teacher_id: 1 }),
           database.collection('teachers').createIndex({ id: 1 }, { unique: true })

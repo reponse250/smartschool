@@ -1,0 +1,18 @@
+{
+  "name": "SmartSchool Mubuga Attendance",
+  "short_name": "SmartSchool",
+  "description": "Record teacher attendance, including when temporarily offline.",
+  "start_url": "/attendance.html",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f3f7ff",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "/assets/smartschool-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

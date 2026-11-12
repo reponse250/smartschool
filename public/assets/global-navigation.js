@@ -217,6 +217,10 @@
                 loadingPanel.remove();
                 renderNavigation(session);
             } catch (error) {
+                if (!navigator.onLine) {
+                    loadingPanel.remove();
+                    return;
+                }
                 console.error('Unable to load system navigation:', error);
                 showNavigationError(loadingPanel, 'Navigation could not be loaded. Check your connection and try again.', refresh);
             }

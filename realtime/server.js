@@ -607,6 +607,18 @@ app.use(
   teacherRouter
 );
 
+app.get('/api/session', requireLogin, (req, res) => {
+  res.json({
+    status: 'success',
+    name: req.session.user.name,
+    role: req.session.user.role,
+    user: {
+      id: req.session.user.id,
+      name: req.session.user.name
+    }
+  });
+});
+
 // Messages
 app.use(
   '/messages',
@@ -1128,7 +1140,9 @@ app.post(
     try {
       const {
         teacher_id,
-        action
+        action,
+        client_event_id,
+        recorded_at
       } = req.body;
 
       if (
@@ -1138,6 +1152,21 @@ app.post(
         return res.status(400).json({
           status: 'error',
           message: 'Invalid attendance details'
+        });
+      }
+
+      const hasQueuedEvent = client_event_id !== undefined || recorded_at !== undefined;
+      if (
+        hasQueuedEvent &&
+        (
+          typeof client_event_id !== 'string' ||
+          !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(client_event_id) ||
+          typeof recorded_at !== 'string'
+        )
+      ) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Invalid queued attendance details'
         });
       }
 
@@ -1156,6 +1185,36 @@ app.post(
         });
       }
 
+      const attendance = database.collection('attendance');
+      const now = new Date();
+      let recordedTime = now;
+      if (hasQueuedEvent) {
+        recordedTime = new Date(recorded_at);
+        if (
+          Number.isNaN(recordedTime.getTime()) ||
+          recordedTime.toISOString() !== recorded_at ||
+          recordedTime.getTime() > now.getTime() + 5 * 60 * 1000
+        ) {
+          return res.status(400).json({
+            status: 'error',
+            message: 'Invalid queued attendance time'
+          });
+        }
+
+        const existing = await attendance.findOne({
+          client_event_id
+        });
+        if (existing) {
+          if (existing.teacher_id !== normalizedTeacherId || existing.action !== action) {
+            return res.status(409).json({
+              status: 'error',
+              message: 'Attendance event ID was already used'
+            });
+          }
+          return res.json({ status: 'success', duplicate: true });
+        }
+      }
+
       const teacher = await database
         .collection('teachers')
         .findOne({
@@ -1169,10 +1228,7 @@ app.post(
         });
       }
 
-      const now = new Date();
-      await database
-        .collection('attendance')
-        .insertOne({
+      const attendanceRecord = {
 
           id: await db.nextId('attendance'),
 
@@ -1180,10 +1236,34 @@ app.post(
 
           action,
 
-          date: dateKey(now),
+          date: dateKey(recordedTime),
 
-          status_time: now
-        });
+          status_time: recordedTime
+      };
+
+      if (hasQueuedEvent) {
+        attendanceRecord.client_event_id = client_event_id;
+        attendanceRecord.received_at = now;
+        attendanceRecord.source = 'queued';
+      }
+
+      try {
+        await attendance.insertOne(attendanceRecord);
+      } catch (error) {
+        if (hasQueuedEvent && error.code === 11000) {
+          const existing = await attendance.findOne({ client_event_id });
+          if (existing?.teacher_id === normalizedTeacherId && existing.action === action) {
+            return res.json({ status: 'success', duplicate: true });
+          }
+          if (existing) {
+            return res.status(409).json({
+              status: 'error',
+              message: 'Attendance event ID was already used'
+            });
+          }
+        }
+        throw error;
+      }
 
       responseCache.clear();
 
