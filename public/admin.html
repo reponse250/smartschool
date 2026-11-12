@@ -1523,9 +1523,9 @@ function renderRecentAttendance(records) {
 
         const timestamp = new Date(record.status_time);
         const dateCell = document.createElement('td');
-        dateCell.textContent = timestamp.toLocaleDateString([], { month:'short', day:'numeric' });
+        dateCell.textContent = timestamp.toLocaleDateString([], { timeZone:'Africa/Kigali', month:'short', day:'numeric' });
         const timeCell = document.createElement('td');
-        timeCell.textContent = timestamp.toLocaleTimeString([], { hour:'numeric', minute:'2-digit' });
+        timeCell.textContent = timestamp.toLocaleTimeString([], { timeZone:'Africa/Kigali', hour:'numeric', minute:'2-digit' });
         const statusCell = document.createElement('td');
         const status = document.createElement('span');
         status.className = 'status-pill';
@@ -1786,7 +1786,7 @@ function renderActivity() {
         detail.textContent = entry.detail;
         const time = document.createElement('time');
         time.dateTime = entry.timestamp.toISOString();
-        time.textContent = entry.timestamp.toLocaleString([], { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
+        time.textContent = entry.timestamp.toLocaleString([], { timeZone:'Africa/Kigali', month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
         copy.append(title, detail, time);
         item.append(marker, copy);
         activityList.append(item);

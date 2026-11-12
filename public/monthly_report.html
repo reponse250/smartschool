@@ -170,8 +170,15 @@
 
 <script>
     // Set default month to current
-    document.getElementById('monthSelect').value = new Date().toISOString().slice(0, 7);
-    document.getElementById('genDate').innerText = new Date().toLocaleDateString();
+    const kigaliParts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Africa/Kigali',
+        year: 'numeric',
+        month: '2-digit'
+    }).formatToParts(new Date());
+    const kigaliYear = kigaliParts.find(part => part.type === 'year').value;
+    const kigaliMonth = kigaliParts.find(part => part.type === 'month').value;
+    document.getElementById('monthSelect').value = `${kigaliYear}-${kigaliMonth}`;
+    document.getElementById('genDate').innerText = new Date().toLocaleDateString('en-GB', { timeZone: 'Africa/Kigali' });
 
     async function loadReport() {
         const month = document.getElementById('monthSelect').value;

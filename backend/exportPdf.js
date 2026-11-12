@@ -15,7 +15,7 @@ router.get('/', async (req, res) => {
         const buffer = await createAttendancePdf({
             rows,
             teacher: req.query.teacher || 'All Faculty',
-            generatedAt: new Date().toLocaleDateString()
+            generatedAt: new Date().toLocaleDateString('en-GB', { timeZone: 'Africa/Kigali' })
         });
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'attachment; filename=Attendance_Report.pdf');

@@ -401,9 +401,10 @@ display: none;
 function updateClock(){
 const now=new Date();
 
-document.getElementById('time').textContent=now.toLocaleTimeString();
+document.getElementById('time').textContent=now.toLocaleTimeString('en-GB',{timeZone:'Africa/Kigali'});
 
 document.getElementById('date').textContent=now.toLocaleDateString('en-GB',{
+timeZone:'Africa/Kigali',
 weekday:'long',
 day:'numeric',
 month:'long',

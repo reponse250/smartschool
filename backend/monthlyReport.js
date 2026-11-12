@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { buildDailyRows } = require('./mongoAttendance');
+const { buildDailyRows, dateKey } = require('./mongoAttendance');
 const createAttendancePdf = require('./attendancePdf');
 
 router.get('/', async (req, res) => {
@@ -11,7 +11,7 @@ router.get('/', async (req, res) => {
 
         const month = typeof req.query.month === 'string'
             ? req.query.month
-            : new Date().toISOString().slice(0, 7);
+            : dateKey(new Date()).slice(0, 7);
         if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) {
             return res.status(400).json({ status: 'error', message: 'Invalid report month' });
         }

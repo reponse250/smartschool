@@ -1,5 +1,5 @@
 const db = require('./db');
-const { buildDailyRows, dateKey } = require('./mongoAttendance');
+const { buildDailyRows, dateKey, getAttendanceDayBounds } = require('./mongoAttendance');
 
 async function createAttendanceTable() {
   await db.connect();
@@ -10,21 +10,22 @@ async function recordAttendance(teacherId, action) {
     throw new Error("Invalid attendance action. Must be 'checkin' or 'checkout'.");
   }
   const database = await db.connect();
+  const now = new Date();
   return database.collection('attendance').insertOne({
     id: await db.nextId('attendance'),
     teacher_id: Number(teacherId),
     action,
-    status_time: new Date()
+    date: dateKey(now),
+    status_time: now
   });
 }
 
 async function getAttendanceByTeacherDate(teacherId, date) {
   const database = await db.connect();
-  const start = new Date(`${date}T00:00:00`);
-  const end = new Date(`${date}T23:59:59.999`);
+  const { start, end } = getAttendanceDayBounds(date);
   return database.collection('attendance').find({
     teacher_id: Number(teacherId),
-    status_time: { $gte: start, $lte: end }
+    status_time: { $gte: start, $lt: end }
   }).sort({ status_time: 1 }).toArray();
 }
 

@@ -1,16 +1,96 @@
 const db = require('./db');
 
+const ATTENDANCE_TIME_ZONE = 'Africa/Kigali';
+const attendanceDateTimeFormatter = new Intl.DateTimeFormat('en-GB', {
+    timeZone: ATTENDANCE_TIME_ZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hourCycle: 'h23'
+});
+const attendanceTimeFormatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: ATTENDANCE_TIME_ZONE,
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true
+});
+
+function formattedParts(formatter, date) {
+    return Object.fromEntries(
+        formatter.formatToParts(date)
+            .filter((part) => part.type !== 'literal')
+            .map((part) => [part.type, part.value])
+    );
+}
+
 function dateKey(date) {
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    const parts = formattedParts(attendanceDateTimeFormatter, date);
+    return `${parts.year}-${parts.month}-${parts.day}`;
 }
 
 function formatTime(date) {
-    return date.toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: true
-    });
+    return attendanceTimeFormatter.format(date);
+}
+
+function timeZoneOffset(date) {
+    const timestamp = Math.floor(date.getTime() / 1000) * 1000;
+    const parts = formattedParts(attendanceDateTimeFormatter, new Date(timestamp));
+    const localAsUtc = Date.UTC(
+        Number(parts.year),
+        Number(parts.month) - 1,
+        Number(parts.day),
+        Number(parts.hour),
+        Number(parts.minute),
+        Number(parts.second)
+    );
+    return localAsUtc - timestamp;
+}
+
+function zonedDateTimeToUtc(year, month, day) {
+    const localAsUtc = Date.UTC(year, month - 1, day);
+    let timestamp = localAsUtc;
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+        const adjusted = localAsUtc - timeZoneOffset(new Date(timestamp));
+        if (adjusted === timestamp) break;
+        timestamp = adjusted;
+    }
+    return new Date(timestamp);
+}
+
+function getAttendanceDayBounds(value) {
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+    if (!match) throw new TypeError('Invalid attendance date');
+
+    const year = Number(match[1]);
+    const month = Number(match[2]);
+    const day = Number(match[3]);
+    const normalized = new Date(Date.UTC(year, month - 1, day));
+    if (
+        normalized.getUTCFullYear() !== year ||
+        normalized.getUTCMonth() !== month - 1 ||
+        normalized.getUTCDate() !== day
+    ) {
+        throw new TypeError('Invalid attendance date');
+    }
+
+    return {
+        start: zonedDateTimeToUtc(year, month, day),
+        end: zonedDateTimeToUtc(
+            normalized.getUTCFullYear(),
+            normalized.getUTCMonth() + 1,
+            normalized.getUTCDate() + 1
+        )
+    };
+}
+
+function shiftDateKey(value, days) {
+    const [year, month, day] = value.split('-').map(Number);
+    const shifted = new Date(Date.UTC(year, month - 1, day + days));
+    return `${shifted.getUTCFullYear()}-${String(shifted.getUTCMonth() + 1).padStart(2, '0')}-${String(shifted.getUTCDate()).padStart(2, '0')}`;
 }
 
 function escapeRegex(value) {
@@ -24,9 +104,16 @@ async function buildDailyRows({ month, teacher, teacherId } = {}) {
             throw new TypeError('Invalid attendance report month');
         }
         const [year, monthNumber] = month.split('-').map(Number);
+        const monthBounds = getAttendanceDayBounds(
+            `${year}-${String(monthNumber).padStart(2, '0')}-01`
+        );
         query.status_time = {
-            $gte: new Date(year, monthNumber - 1, 1),
-            $lt: new Date(year, monthNumber, 1)
+            $gte: monthBounds.start,
+            $lt: zonedDateTimeToUtc(
+                monthNumber === 12 ? year + 1 : year,
+                monthNumber === 12 ? 1 : monthNumber + 1,
+                1
+            )
         };
     }
 
@@ -100,7 +187,10 @@ async function buildDailyRows({ month, teacher, teacherId } = {}) {
             row = {
                 teacher_id: record.teacher_id,
                 name,
-                day_name: timestamp.toLocaleDateString('en-US', { weekday: 'long' }),
+                day_name: timestamp.toLocaleDateString('en-US', {
+                    timeZone: ATTENDANCE_TIME_ZONE,
+                    weekday: 'long'
+                }),
                 attendance_date: attendanceDate,
                 check_in: null,
                 check_out: null,
@@ -128,10 +218,8 @@ async function buildDailyRows({ month, teacher, teacherId } = {}) {
 }
 
 async function getTodayAttendanceSummary(now = new Date()) {
-    const start = new Date(now);
-    start.setHours(0, 0, 0, 0);
-    const end = new Date(start);
-    end.setDate(end.getDate() + 1);
+    const today = dateKey(now);
+    const { start, end } = getAttendanceDayBounds(today);
 
     const database = await db.connect();
     const teachers = database.collection('teachers');
@@ -163,7 +251,7 @@ async function getTodayAttendanceSummary(now = new Date()) {
     const recentTeachersById = new Map(recentNames.map((teacher) => [teacher.id, teacher]));
 
     return {
-        date: dateKey(start),
+        date: today,
         totalTeachers,
         presentCount,
         absentCount: Math.max(0, totalTeachers - presentCount),
@@ -176,9 +264,7 @@ async function getTodayAttendanceSummary(now = new Date()) {
 }
 
 async function getRecentAttendanceActivity(now = new Date()) {
-    const start = new Date(now);
-    start.setHours(0, 0, 0, 0);
-    start.setDate(start.getDate() - 6);
+    const start = getAttendanceDayBounds(shiftDateKey(dateKey(now), -6)).start;
 
     const database = await db.connect();
     const records = await database.collection('attendance').find({
@@ -211,14 +297,18 @@ async function getDashboardAttendance(monthKey, now = new Date()) {
     }
 
     const [year, month] = selectedMonth.split('-').map(Number);
-    const monthStart = new Date(year, month - 1, 1);
-    const monthEnd = new Date(year, month, 1);
-    const trendStart = new Date(now);
-    trendStart.setHours(0, 0, 0, 0);
-    trendStart.setDate(trendStart.getDate() - 6);
-    const trendEnd = new Date(now);
-    trendEnd.setHours(0, 0, 0, 0);
-    trendEnd.setDate(trendEnd.getDate() + 1);
+    const monthBounds = getAttendanceDayBounds(
+        `${year}-${String(month).padStart(2, '0')}-01`
+    );
+    const monthStart = monthBounds.start;
+    const monthEnd = zonedDateTimeToUtc(
+        month === 12 ? year + 1 : year,
+        month === 12 ? 1 : month + 1,
+        1
+    );
+    const today = dateKey(now);
+    const trendStart = getAttendanceDayBounds(shiftDateKey(today, -6)).start;
+    const trendEnd = getAttendanceDayBounds(today).end;
 
     const database = await db.connect();
     const records = await database.collection('attendance').find({
@@ -272,6 +362,7 @@ module.exports = {
     buildDailyRows,
     dateKey,
     formatTime,
+    getAttendanceDayBounds,
     getDashboardAttendance,
     getRecentAttendanceActivity,
     getTodayAttendanceSummary

@@ -30,7 +30,7 @@ router.get('/', async (req, res) => {
                 teacher: typeof req.query.teacher === 'string' && req.query.teacher.trim()
                     ? req.query.teacher.trim()
                     : (teacherId ? rows[0].name : 'All Faculty'),
-                generatedAt: new Date().toLocaleString()
+                generatedAt: new Date().toLocaleString('en-GB', { timeZone: 'Africa/Kigali' })
             });
 
             res.setHeader('Content-Type', 'application/pdf');

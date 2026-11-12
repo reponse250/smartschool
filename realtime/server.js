@@ -40,6 +40,7 @@ const messageRouter = require('../backend/messages');
 const teacherRecordRouter = require('../backend/teacherRecord');
 
 const {
+  dateKey,
   getDashboardAttendance,
   getRecentAttendanceActivity,
   getTodayAttendanceSummary
@@ -1168,6 +1169,7 @@ app.post(
         });
       }
 
+      const now = new Date();
       await database
         .collection('attendance')
         .insertOne({
@@ -1178,7 +1180,9 @@ app.post(
 
           action,
 
-          status_time: new Date()
+          date: dateKey(now),
+
+          status_time: now
         });
 
       responseCache.clear();
