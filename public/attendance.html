@@ -346,6 +346,31 @@ display: none;
     *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
 }
 </style>
+<script>
+(() => {
+    const { protocol, hostname, href, origin } = window.location;
+    const isPackagedApp = protocol === 'file:' ||
+        protocol === 'capacitor:' ||
+        protocol === 'app:' ||
+        hostname === 'localhost';
+
+    if (!isPackagedApp) return;
+
+    const apiBase = 'https://smartschool-o73k.onrender.com';
+    const originalFetch = window.fetch.bind(window);
+    window.fetch = (input, init) => {
+        const requestUrl = input instanceof Request ? input.url : String(input);
+        const url = new URL(requestUrl, href);
+        if (url.origin !== origin) return originalFetch(input, init);
+
+        const target = new URL(`${url.pathname}${url.search}${url.hash}`, apiBase);
+        const request = input instanceof Request
+            ? new Request(target.href, input)
+            : target.href;
+        return originalFetch(request, { ...init, credentials: 'include' });
+    };
+})();
+</script>
 </head>
 
 <body>
@@ -639,7 +664,9 @@ window.addEventListener('online', () => {
     window.smartSchoolOffline.reconnect().catch(err => console.error('Attendance sync failed', err));
 });
 window.addEventListener('offline', () => window.smartSchoolOffline.updateStatus());
-if ('serviceWorker' in navigator) {
+const isPackagedApp = ['file:', 'capacitor:', 'app:'].includes(window.location.protocol) ||
+    (window.location.protocol === 'https:' && window.location.hostname === 'localhost');
+if (!isPackagedApp && 'serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js')
             .catch(err => {

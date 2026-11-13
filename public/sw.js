@@ -1,6 +1,7 @@
-const CACHE_NAME = 'smartschool-attendance-v2';
+const CACHE_NAME = 'smartschool-attendance-v3';
 const APP_SHELL = [
     '/attendance-offline.js',
+    '/assets/api-base.js',
     '/assets/style.css',
     '/assets/theme.css',
     '/assets/theme.js',

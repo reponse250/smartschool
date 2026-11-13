@@ -72,7 +72,15 @@ const normalizeOrigin = (value) => {
   }
 
   try {
-    return new URL(value.trim()).origin;
+    const url = new URL(value.trim());
+    if (
+      url.origin === 'null' &&
+      ['app:', 'capacitor:'].includes(url.protocol) &&
+      url.hostname
+    ) {
+      return `${url.protocol}//${url.host}`;
+    }
+    return url.origin;
   } catch {
     return null;
   }
@@ -81,7 +89,10 @@ const normalizeOrigin = (value) => {
 const defaultAllowedOrigins = [
   'https://mubuga.netlify.app',
   'https://www.mubuga.netlify.app',
-  'https://smartschool-o73k.onrender.com'
+  'https://smartschool-o73k.onrender.com',
+  'https://localhost',
+  'capacitor://localhost',
+  'app://localhost'
 ];
 
 const allowedOrigins = new Set(

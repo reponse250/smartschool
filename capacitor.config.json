@@ -1,0 +1,8 @@
+{
+  "appId": "rw.mubuga.smartschool",
+  "appName": "SmartSchool Mubuga",
+  "webDir": "public",
+  "server": {
+    "androidScheme": "https"
+  }
+}

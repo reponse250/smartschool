@@ -2,12 +2,33 @@
   "name": "teacher-attendance-system",
   "version": "1.0.0",
   "description": "SmartSchool Teacher Attendance Management System",
+  "main": "desktop/main.js",
   "scripts": {
     "start": "node realtime/server.js",
     "create:super-admin": "node backend/init_db.js",
-    "migrate:mysql-to-mongo": "node backend/migrate_mysql_to_mongo.js"
+    "migrate:mysql-to-mongo": "node backend/migrate_mysql_to_mongo.js",
+    "app:assets": "capacitor-assets generate --assetPath assets --pwaManifestPath public/manifest.webmanifest --iconBackgroundColor \"#2563eb\" --splashBackgroundColor \"#f3f7ff\"",
+    "android:add": "cap add android",
+    "android:sync": "cap sync android",
+    "android:open": "cap open android",
+    "ios:add": "cap add ios",
+    "ios:sync": "cap sync ios",
+    "ios:open": "cap open ios",
+    "desktop": "electron .",
+    "desktop:windows": "electron-builder --win nsis",
+    "package:source": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-source.ps1"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^8.6.2",
+    "@capacitor/assets": "^4.0.0",
+    "@capacitor/cli": "^8.6.2",
+    "@capacitor/ios": "^8.6.2",
+    "electron": "^45.3.1",
+    "electron-builder": "^26.18.0",
+    "mysql2": "^3.24.6"
   },
   "dependencies": {
+    "@capacitor/core": "^8.6.2",
     "bcrypt": "^6.0.0",
     "compression": "^1.8.2",
     "connect-mongo": "^5.1.0",
@@ -20,7 +41,25 @@
     "pdfkit": "^0.20.2",
     "socket.io": "^4.8.3"
   },
-  "devDependencies": {
-    "mysql2": "^3.24.6"
+  "build": {
+    "appId": "rw.mubuga.smartschool",
+    "productName": "SmartSchool Mubuga",
+    "asar": true,
+    "npmRebuild": false,
+    "files": [
+      "desktop/**/*",
+      "public/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
   }
 }
