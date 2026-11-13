@@ -1,18 +1,39 @@
 {
-  "name": "SmartSchool Mubuga Attendance",
+  "id": "/",
+  "name": "SmartSchool Mubuga",
   "short_name": "SmartSchool",
-  "description": "Record teacher attendance, including when temporarily offline.",
+  "description": "SmartSchool Mubuga staff and attendance management.",
   "start_url": "/attendance.html",
   "scope": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "background_color": "#f3f7ff",
   "theme_color": "#2563eb",
+  "categories": ["education", "productivity"],
   "icons": [
+    {
+      "src": "/assets/app-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
     {
       "src": "/assets/smartschool-icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ]
 }

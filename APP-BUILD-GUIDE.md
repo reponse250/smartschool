@@ -30,6 +30,27 @@ npm install
 ```
 
 Generated platform directories and build output are not part of the source ZIP.
+The website's 192px and 512px install icons are committed under
+`public/assets/`; after changing the logo, regenerate them with:
+
+```powershell
+npm run pwa:icons
+```
+
+## Install from the website
+
+The website can be installed as a Progressive Web App on phones and computers.
+Open `https://mubuga.netlify.app/` in a supported browser while online:
+
+- **Android:** Chrome menu → **Install app** (or use the Install SmartSchool
+  button when it appears).
+- **Windows/macOS/Linux:** Chrome or Edge install icon in the address bar, or
+  browser menu → **Install SmartSchool**.
+- **iPhone/iPad:** Safari Share → **Add to Home Screen**.
+
+The website install opens the hosted app and keeps database credentials on the
+backend. Attendance entries can queue locally after signing in and loading the
+teacher list once online; other modules require an internet connection.
 
 ## Android
 

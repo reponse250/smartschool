@@ -7,6 +7,7 @@
     "start": "node realtime/server.js",
     "create:super-admin": "node backend/init_db.js",
     "migrate:mysql-to-mongo": "node backend/migrate_mysql_to_mongo.js",
+    "pwa:icons": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/generate-pwa-icons.ps1",
     "app:assets": "capacitor-assets generate --assetPath assets --pwaManifestPath public/manifest.webmanifest --iconBackgroundColor \"#2563eb\" --splashBackgroundColor \"#f3f7ff\"",
     "android:add": "cap add android",
     "android:sync": "cap sync android",

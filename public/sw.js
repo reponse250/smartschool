@@ -1,7 +1,11 @@
-const CACHE_NAME = 'smartschool-attendance-v3';
+const CACHE_NAME = 'smartschool-attendance-v4';
 const APP_SHELL = [
+    '/',
     '/attendance-offline.js',
     '/assets/api-base.js',
+    '/assets/app-icon-192.png',
+    '/assets/app-icon-512.png',
+    '/assets/pwa-install.js',
     '/assets/style.css',
     '/assets/theme.css',
     '/assets/theme.js',
@@ -50,6 +54,23 @@ self.addEventListener('fetch', event => {
     if (request.method !== 'GET' || new URL(request.url).origin !== self.location.origin) return;
 
     const url = new URL(request.url);
+    if (request.mode === 'navigate' && url.pathname === '/') {
+        event.respondWith(
+            (async () => {
+                try {
+                    const response = await fetch(request);
+                    if (response.ok && response.headers.get('content-type')?.includes('text/html')) {
+                        await (await caches.open(CACHE_NAME)).put('/', response.clone());
+                    }
+                    return response;
+                } catch (error) {
+                    return (await caches.match('/')) || Response.error();
+                }
+            })()
+        );
+        return;
+    }
+
     if (request.mode === 'navigate' && url.pathname === '/attendance.html') {
         event.respondWith(
             (async () => {
